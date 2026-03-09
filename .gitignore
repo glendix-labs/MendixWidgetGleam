@@ -1,5 +1,21 @@
 # 의존성
 node_modules/
+.yarn/
+.pnp.*
+
+# 패키지 매니저 lock 파일
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+bun.lock
+
+# 패키지 매니저 캐시/설정
+.npmrc
+.yarnrc
+.yarnrc.yml
+.pnpmfile.cjs
+.npmignore
 
 # Gleam 컴파일 출력
 build/
