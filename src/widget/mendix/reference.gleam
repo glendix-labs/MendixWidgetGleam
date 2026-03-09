@@ -30,12 +30,12 @@ pub fn validation(ref: ReferenceValue) -> Option(String)
 
 // === ReferenceSetValue (다중 참조) ===
 
-/// 참조 목록 (없으면 None)
-@external(javascript, "../mendix_ffi.mjs", "get_modifiable_value")
+/// 참조 목록 (없으면 None) — JS Array↔Gleam List 변환 포함
+@external(javascript, "../mendix_ffi.mjs", "get_reference_set_value")
 pub fn multi_value(rset: ReferenceSetValue) -> Option(List(a))
 
-/// 참조 목록 설정 (None → 전체 해제)
-@external(javascript, "../mendix_ffi.mjs", "modifiable_set_value")
+/// 참조 목록 설정 (None → 전체 해제) — Gleam List→JS Array 변환 포함
+@external(javascript, "../mendix_ffi.mjs", "set_reference_set_value")
 pub fn set_multi_value(rset: ReferenceSetValue, value: Option(List(a))) -> Nil
 
 /// 읽기 전용 여부

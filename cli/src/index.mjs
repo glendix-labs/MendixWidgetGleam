@@ -214,6 +214,8 @@ gleam format                     # Gleam 코드 포맷팅
 - \`mendix/list_attribute.gleam\` — \`ListAttributeValue\` 등 리스트 연결 타입
 - \`mendix/selection.gleam\` — 단일/다중 선택
 - \`mendix/reference.gleam\` — 참조 관계 값
+- \`mendix/date.gleam\` — \`JsDate\` (JS Date opaque 래퍼)
+- \`mendix/big.gleam\` — \`Big\` (Big.js 고정밀 십진수 래퍼)
 - \`mendix/file.gleam\` — 파일/이미지
 - \`mendix/icon.gleam\` — 아이콘
 - \`mendix/formatter.gleam\` — 값 포맷팅/파싱

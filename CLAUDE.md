@@ -38,6 +38,8 @@ src/
       list_attribute.gleam            #   ListAttributeValue, ListActionValue, ListExpressionValue, ListWidgetValue
       selection.gleam                 #   SelectionSingleValue, SelectionMultiValue
       reference.gleam                 #   ReferenceValue, ReferenceSetValue
+      date.gleam                      #   JsDate (JS Date opaque 래퍼)
+      big.gleam                       #   Big (Big.js 고정밀 십진수 래퍼)
       file.gleam                      #   FileValue, WebImage
       icon.gleam                      #   WebIcon (GlyphIcon, WebImageIcon, Icon)
       formatter.gleam                 #   ValueFormatter (format, parse)
@@ -71,7 +73,7 @@ JSX 파일 없이 Gleam + FFI로 위젯을 구현한다. React 원시 함수는 
 Gleam 모듈 구조 — React:
 - `react.gleam` — 핵심 타입(`ReactElement`, `JsProps`, `Props`, `Ref`) + `el`/`el_`/`void`/`fragment`/`text`/`none` + 조건부 렌더링(`when`, `when_some`)
 - `react/prop.gleam` — Props 파이프라인 빌더 (`prop.new() |> prop.class("x") |> prop.on_click(handler)`) + Style 빌더
-- `react/hook.gleam` — React Hooks (`use_state`, `use_effect`, `use_memo`, `use_callback`, `use_ref`)
+- `react/hook.gleam` — React Hooks (`use_state`, `use_effect`, `use_effect_cleanup`, `use_memo`, `use_callback`, `use_ref`)
 - `react/event.gleam` — 이벤트 타입 + `target_value`, `prevent_default`, `stop_propagation`, `key`
 - `react/html.gleam` — HTML 태그 편의 함수 (순수 Gleam, FFI 없음) — `div`, `span`, `input`, `button` 등
 
@@ -83,7 +85,9 @@ Gleam 모듈 구조 — Mendix:
 - `mendix/list_value.gleam` — `ListValue`(`items`, `offset`, `limit`, `set_filter`, `reload`) + `SortInstruction`/`SortDirection`
 - `mendix/list_attribute.gleam` — `ListAttributeValue`/`ListActionValue`/`ListExpressionValue`/`ListWidgetValue` — `get(type, ObjectItem)` 패턴
 - `mendix/selection.gleam` — `SelectionSingleValue`/`SelectionMultiValue`
-- `mendix/reference.gleam` — `ReferenceValue`/`ReferenceSetValue` (ModifiableValue 패턴)
+- `mendix/reference.gleam` — `ReferenceValue`/`ReferenceSetValue` (단일은 ModifiableValue, 다중은 Array↔List 변환)
+- `mendix/date.gleam` — `JsDate` opaque type + 생성/변환/접근자 (월: Gleam 1-based ↔ JS 0-based 자동 변환)
+- `mendix/big.gleam` — `Big` opaque type (Big.js) + 산술/비교/변환 (`compare` → `gleam/order.Order`)
 - `mendix/file.gleam` — `FileValue`/`WebImage`
 - `mendix/icon.gleam` — `WebIcon` + `IconType`(Glyph, Image, IconFont)
 - `mendix/formatter.gleam` — `ValueFormatter` (`format`, `parse`)

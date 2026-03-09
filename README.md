@@ -35,6 +35,8 @@ src/
       list_attribute.gleam            #   ListAttributeValue 등 리스트 연결 타입
       selection.gleam                 #   단일/다중 선택
       reference.gleam                 #   ReferenceValue, ReferenceSetValue
+      date.gleam                      #   JsDate (JS Date 래퍼)
+      big.gleam                       #   Big (Big.js 고정밀 십진수 래퍼)
       file.gleam                      #   FileValue, WebImage
       icon.gleam                      #   WebIcon (Glyph, Image, IconFont)
       formatter.gleam                 #   ValueFormatter (format, parse)

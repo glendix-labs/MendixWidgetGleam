@@ -22,6 +22,24 @@ pub fn use_effect_always(effect_fn: fn() -> Nil) -> Nil
 @external(javascript, "../react_ffi.mjs", "use_effect_once")
 pub fn use_effect_once(effect_fn: fn() -> Nil) -> Nil
 
+// === useEffect (cleanup 반환) ===
+// Gleam fn() -> fn() -> Nil = JS에서 함수를 반환하는 함수 → React cleanup으로 인식
+
+/// 의존성 배열과 함께 실행 (cleanup 함수 반환)
+@external(javascript, "../react_ffi.mjs", "use_effect")
+pub fn use_effect_cleanup(
+  setup: fn() -> fn() -> Nil,
+  deps: List(a),
+) -> Nil
+
+/// 매 렌더링마다 실행 + cleanup
+@external(javascript, "../react_ffi.mjs", "use_effect_always")
+pub fn use_effect_always_cleanup(setup: fn() -> fn() -> Nil) -> Nil
+
+/// 마운트 시 한 번만 실행 + cleanup
+@external(javascript, "../react_ffi.mjs", "use_effect_once")
+pub fn use_effect_once_cleanup(setup: fn() -> fn() -> Nil) -> Nil
+
 // === useMemo / useCallback ===
 
 /// 메모이제이션된 값 계산

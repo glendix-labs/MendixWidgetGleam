@@ -209,6 +209,20 @@ export function modifiable_set_value(obj, option) {
   obj.setValue(from_option(option));
 }
 
+// === ReferenceSetValue (Array↔List 변환) ===
+
+export function get_reference_set_value(obj) {
+  return to_option(obj.value ? toList(obj.value) : undefined);
+}
+
+export function set_reference_set_value(obj, option) {
+  if (option instanceof Some) {
+    obj.setValue(option[0].toArray());
+  } else {
+    obj.setValue(undefined);
+  }
+}
+
 export function get_modifiable_read_only(obj) {
   return obj.readOnly;
 }
@@ -272,6 +286,134 @@ export function get_sort_id(instr) {
 
 export function get_sort_asc(instr) {
   return instr.asc;
+}
+
+// === JS Date ===
+
+export function date_now() {
+  return new Date();
+}
+
+export function date_from_iso(iso_string) {
+  return new Date(iso_string);
+}
+
+export function date_from_timestamp(ms) {
+  return new Date(ms);
+}
+
+// month: Gleam 1-based → JS 0-based 변환
+export function date_create(year, month, day, hours, minutes, seconds, ms) {
+  return new Date(year, month - 1, day, hours, minutes, seconds, ms);
+}
+
+export function date_to_iso(d) {
+  return d.toISOString();
+}
+
+export function date_get_time(d) {
+  return d.getTime();
+}
+
+export function date_to_string(d) {
+  return d.toString();
+}
+
+export function date_get_full_year(d) {
+  return d.getFullYear();
+}
+
+// JS 0-based → Gleam 1-based 변환
+export function date_get_month(d) {
+  return d.getMonth() + 1;
+}
+
+export function date_get_date(d) {
+  return d.getDate();
+}
+
+export function date_get_hours(d) {
+  return d.getHours();
+}
+
+export function date_get_minutes(d) {
+  return d.getMinutes();
+}
+
+export function date_get_seconds(d) {
+  return d.getSeconds();
+}
+
+export function date_get_milliseconds(d) {
+  return d.getMilliseconds();
+}
+
+export function date_get_day(d) {
+  return d.getDay();
+}
+
+// === Big.js ===
+
+import Big from "big.js";
+
+export function big_from_string(s) {
+  return new Big(s);
+}
+
+export function big_from_int(n) {
+  return new Big(n);
+}
+
+export function big_from_float(f) {
+  return new Big(f);
+}
+
+export function big_to_string(b) {
+  return b.toString();
+}
+
+export function big_to_float(b) {
+  return b.toNumber();
+}
+
+export function big_to_int(b) {
+  return Math.trunc(b.toNumber());
+}
+
+export function big_to_fixed(b, dp) {
+  return b.toFixed(dp);
+}
+
+export function big_add(a, b) {
+  return a.plus(b);
+}
+
+export function big_sub(a, b) {
+  return a.minus(b);
+}
+
+export function big_mul(a, b) {
+  return a.times(b);
+}
+
+export function big_div(a, b) {
+  return a.div(b);
+}
+
+export function big_abs(b) {
+  return b.abs();
+}
+
+export function big_negate(b) {
+  return b.times(-1);
+}
+
+export function big_cmp(a, b) {
+  return a.cmp(b);
+}
+
+export function big_eq(a, b) {
+  return a.eq(b);
 }
 
 // === Filter 빌더 (mendix/filters/builders 래핑) ===
