@@ -2,45 +2,21 @@
 
 **Gleam 언어로 Mendix Pluggable Widget을 개발하는 프로젝트.**
 
-JSX를 사용하지 않고, Gleam 코드만으로 React 컴포넌트를 작성하여 Mendix Studio Pro에서 동작하는 위젯을 만든다. Gleam을 JavaScript로 컴파일하고, Gleam FFI로 React API를 직접 바인딩하는 방식이다.
+JSX를 사용하지 않고, Gleam 코드만으로 React 컴포넌트를 작성하여 Mendix Studio Pro에서 동작하는 위젯을 만든다. React와 Mendix API 바인딩은 [glendix](https://hexdocs.pm/glendix/) 패키지가 제공한다.
 
 ## 왜 Gleam인가?
 
 - **정적 타입 안전성** — Gleam의 강력한 타입 시스템으로 런타임 에러를 컴파일 타임에 방지
 - **불변 데이터** — 예측 가능한 상태 관리
 - **JavaScript 타겟 지원** — `gleam build --target javascript`로 ES 모듈 출력
-- **범용 FFI 계층** — `react_ffi.mjs`에 React 원시 함수, `mendix_ffi.mjs`에 Mendix 런타임 타입 접근자를 분리하고, Gleam 모듈 계층에서 타입 안전한 API 제공
-- **Mendix API 완전 바인딩** — `EditableValue`, `ActionValue`, `ListValue` 등 모든 Mendix Pluggable Widget API를 Gleam opaque type + FFI 접근자로 지원. 별도의 FFI 수정 없이 바로 사용 가능
+- **glendix 패키지** — React + Mendix API의 타입 안전한 Gleam 바인딩. `EditableValue`, `ActionValue`, `ListValue` 등 모든 Mendix Pluggable Widget API를 지원
 
 ## 아키텍처
 
 ```
 src/
-  widget/                             # Gleam 소스 코드
+  widget/                             # 위젯 고유 코드
     mendix_widget_gleam.gleam         #   위젯 메인 모듈 (컴포넌트 로직)
-    react_ffi.mjs                     #   React FFI 어댑터 (React 원시 함수)
-    mendix_ffi.mjs                    #   Mendix FFI 어댑터 (Mendix 런타임 타입 접근)
-    react.gleam                       #   핵심 타입 + createElement + fragment/text/none
-    react/
-      prop.gleam                      #   Props 빌더 (파이프라인 API)
-      hook.gleam                      #   React Hooks (useState, useEffect 등)
-      event.gleam                     #   이벤트 타입 + 값 추출
-      html.gleam                      #   HTML 태그 편의 함수 (순수 Gleam)
-    mendix.gleam                      #   Mendix 핵심 타입 + Props 접근자
-    mendix/
-      editable_value.gleam            #   EditableValue (편집 가능한 값)
-      action.gleam                    #   ActionValue (액션 실행)
-      dynamic_value.gleam             #   DynamicValue (동적 값)
-      list_value.gleam                #   ListValue + FilterCondition + SortInstruction
-      list_attribute.gleam            #   ListAttributeValue 등 리스트 연결 타입
-      selection.gleam                 #   단일/다중 선택
-      reference.gleam                 #   ReferenceValue, ReferenceSetValue
-      date.gleam                      #   JsDate (JS Date 래퍼)
-      big.gleam                       #   Big (Big.js 고정밀 십진수 래퍼)
-      file.gleam                      #   FileValue, WebImage
-      icon.gleam                      #   WebIcon (Glyph, Image, IconFont)
-      formatter.gleam                 #   ValueFormatter (format, parse)
-      filter.gleam                    #   Filter 조건 빌더
     editor_config.gleam               #   Studio Pro 속성 패널 설정
   scripts/                            # 빌드/개발 스크립트 (gleam run -m으로 실행)
     cmd.gleam + cmd_ffi.mjs           #   셸 명령어 실행 유틸리티
@@ -53,12 +29,15 @@ src/
   MendixWidgetGleam.editorConfig.js   # 브릿지 (editorConfig)
   MendixWidgetGleam.xml               # 위젯 속성 정의
   package.xml                         # Mendix 패키지 매니페스트
+gleam.toml                            # glendix >= 1.0.0 의존성 포함
 ```
+
+React/Mendix FFI 바인딩은 이 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공된다.
 
 ### 빌드 파이프라인
 
 ```
-Gleam 소스 (.gleam) + FFI 어댑터 (react_ffi.mjs, mendix_ffi.mjs)
+위젯 코드 (.gleam) + glendix 패키지 (Hex)
     ↓  gleam run -m scripts/build (Gleam 컴파일 자동 수행)
 ES 모듈 (.mjs) — build/dev/javascript/...
     ↓  브릿지 JS가 import
@@ -68,14 +47,14 @@ ES 모듈 (.mjs) — build/dev/javascript/...
 
 ### 핵심 원리
 
-Gleam 함수 `fn(JsProps) -> ReactElement`는 React 함수형 컴포넌트와 동일한 시그니처다. `react_ffi.mjs`는 React 원시 함수를, `mendix_ffi.mjs`는 Mendix 런타임 타입 접근자를 노출하는 얇은 래퍼이고, Gleam 모듈 계층이 타입 안전한 API를 제공한다.
+Gleam 함수 `fn(JsProps) -> ReactElement`는 React 함수형 컴포넌트와 동일한 시그니처다. glendix가 React 원시 함수와 Mendix 런타임 타입 접근자를 타입 안전하게 제공하므로, 위젯 프로젝트에서는 비즈니스 로직에만 집중하면 된다.
 
 ```gleam
 // src/widget/mendix_widget_gleam.gleam
-import widget/mendix
-import widget/react.{type JsProps, type ReactElement}
-import widget/react/html
-import widget/react/prop
+import glendix/mendix
+import glendix/react.{type JsProps, type ReactElement}
+import glendix/react/html
+import glendix/react/prop
 
 pub fn widget(props: JsProps) -> ReactElement {
   let sample_text = mendix.get_string_prop(props, "sampleText")
@@ -88,9 +67,9 @@ pub fn widget(props: JsProps) -> ReactElement {
 Mendix 복합 타입도 Gleam에서 타입 안전하게 사용할 수 있다:
 
 ```gleam
-import widget/mendix
-import widget/mendix/editable_value
-import widget/mendix/action
+import glendix/mendix
+import glendix/mendix/editable_value
+import glendix/mendix/action
 
 pub fn widget(props: JsProps) -> ReactElement {
   // EditableValue 접근
@@ -153,16 +132,16 @@ gleam run -m scripts/start     # Mendix 테스트 프로젝트와 연동 개발
 ## 기술 스택
 
 - **Gleam** — 위젯 로직, UI, 빌드 스크립트 (JavaScript 타겟 컴파일)
-- **Gleam FFI** — React/Mendix API 바인딩 (`@external` + `react_ffi.mjs` + `mendix_ffi.mjs`)
+- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API Gleam 바인딩 (Hex 패키지)
 - **React 19** — Mendix Pluggable Widget 런타임
 - **Rollup** — `@mendix/pluggable-widgets-tools` 기반 번들링
 
 ## 제약사항
 
 - Gleam → JS → Mendix Widget 파이프라인은 공식 지원되지 않는 조합이므로 빌드 설정 커스터마이징이 필요할 수 있다
-- JSX 파일을 사용하지 않는다 — 모든 React 로직은 Gleam + FFI로 구현
+- JSX 파일을 사용하지 않는다 — 모든 React 로직은 Gleam + glendix로 구현
 - Redraw 등 외부 Gleam React 라이브러리는 사용하지 않는다
-- FFI 파일에는 API 노출만 작성하고, 비즈니스 로직은 반드시 Gleam으로 작성
+- 위젯 프로젝트에 FFI 파일을 직접 작성하지 않는다 — React/Mendix FFI는 glendix가 제공
 
 ## 라이선스
 
