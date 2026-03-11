@@ -245,6 +245,7 @@ React:
 - \`glendix/react/hook\` — React Hooks (useState, useEffect 등)
 - \`glendix/react/event\` — 이벤트 타입 + 값 추출
 - \`glendix/react/html\` — HTML 태그 편의 함수
+- \`glendix/binding\` — 외부 React 컴포넌트 바인딩
 
 Mendix:
 - \`glendix/mendix\` — \`ValueStatus\`, \`ObjectItem\`, Props 접근자

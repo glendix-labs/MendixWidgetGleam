@@ -22,7 +22,7 @@ src/
     hello_world.gleam               # Hello World 공유 컴포넌트
   MendixWidget.xml                    # 위젯 속성 정의
   package.xml                         # Mendix 패키지 매니페스트
-gleam.toml                            # glendix >= 1.0.0 의존성 포함
+gleam.toml                            # glendix >= 1.2.0 의존성 포함
 ```
 
 React/Mendix FFI 바인딩은 이 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공된다.

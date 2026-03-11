@@ -45,8 +45,10 @@ glendix = { path = "../glendix" }
 ```
 
 ```bash
-npm install
+gleam run -m glendix/install
 ```
+
+> `glendix/install`은 패키지 매니저를 자동 감지하여 의존성을 설치하고, `bindings.json`이 있으면 외부 React 컴포넌트 바인딩도 자동 생성합니다.
 
 #### 4) 빌드 확인
 
@@ -198,11 +200,74 @@ react.none()  // React null 반환
 
 #### 외부 React 컴포넌트 사용
 
+`glendix/binding` 모듈로 외부 React 라이브러리를 **`.mjs` 없이** 사용합니다.
+
+**1단계: `bindings.json` 작성** (프로젝트 루트)
+
+```json
+{
+  "recharts": {
+    "components": ["PieChart", "Pie", "Cell", "LineChart", "Line",
+                   "XAxis", "YAxis", "CartesianGrid", "Tooltip", "Legend",
+                   "ResponsiveContainer"]
+  }
+}
+```
+
+**2단계: `gleam run -m glendix/install`** 실행 (바인딩 자동 생성)
+
+**3단계: 순수 Gleam 래퍼 모듈 작성** (편의용, 선택사항)
+
 ```gleam
-// 다른 React 컴포넌트를 합성할 때
-react.component(my_component, prop.new() |> prop.string("title", "Hello"), [
-  // children
-])
+// src/chart/recharts.gleam — 순수 Gleam, FFI 없음!
+import glendix/binding
+import glendix/react.{type Component}
+
+fn m() { binding.module("recharts") }
+
+pub fn pie_chart() -> Component       { binding.resolve(m(), "PieChart") }
+pub fn pie() -> Component             { binding.resolve(m(), "Pie") }
+pub fn cell() -> Component            { binding.resolve(m(), "Cell") }
+pub fn tooltip() -> Component         { binding.resolve(m(), "Tooltip") }
+pub fn legend() -> Component          { binding.resolve(m(), "Legend") }
+pub fn responsive_container() -> Component {
+  binding.resolve(m(), "ResponsiveContainer")
+}
+```
+
+**4단계: 위젯에서 사용**
+
+```gleam
+import chart/recharts
+import glendix/react
+import glendix/react/prop
+
+pub fn my_pie_chart(data) -> react.ReactElement {
+  react.component(recharts.responsive_container(),
+    prop.new() |> prop.int("width", 400) |> prop.int("height", 300),
+    [
+      react.component(recharts.pie_chart(), prop.new(), [
+        react.component(recharts.pie(),
+          prop.new()
+          |> prop.any("data", data)
+          |> prop.string("dataKey", "value"),
+          [],
+        ),
+        react.component(recharts.tooltip(), prop.new(), []),
+        react.component(recharts.legend(), prop.new(), []),
+      ]),
+    ],
+  )
+}
+```
+
+래퍼 모듈 없이 직접 사용하는 것도 가능합니다:
+
+```gleam
+import glendix/binding
+
+let rc = binding.module("recharts")
+react.component(binding.resolve(rc, "PieChart"), props, children)
 ```
 
 ### 3.2 Props 빌더
@@ -1305,8 +1370,8 @@ pub fn dashboard(props) -> ReactElement {
 | 문제 | 원인 | 해결 |
 |---|---|---|
 | `gleam build` 실패: glendix를 찾을 수 없음 | `gleam.toml`의 경로가 잘못됨 | `path = "../glendix"` 경로 확인 |
-| `react is not defined` | peer dependency 미설치 | `npm install react@^19.0.0` |
-| `Big is not a constructor` | big.js 미설치 | `npm install big.js@^6.0.0` |
+| `react is not defined` | peer dependency 미설치 | `gleam run -m glendix/install` |
+| `Big is not a constructor` | big.js 미설치 | `gleam run -m glendix/install` |
 
 ### 런타임 에러
 
@@ -1315,6 +1380,9 @@ pub fn dashboard(props) -> ReactElement {
 | `Cannot read property of undefined` | 존재하지 않는 prop 접근 | `get_prop` (Option) 대신 `get_prop_required` 사용 시 prop 이름 확인 |
 | `set_value` 호출 시 에러 | read_only 상태에서 값 설정 | `ev.is_editable(attr)` 확인 후 설정 |
 | Hook 순서 에러 | 조건부로 Hook 호출 | Hook은 항상 동일한 순서로 호출해야 함 (React Rules of Hooks) |
+| `바인딩이 생성되지 않았습니다` | `binding_ffi.mjs`가 스텁 상태 | `gleam run -m glendix/install` 실행 |
+| `바인딩에 등록되지 않은 모듈` | `bindings.json`에 해당 패키지 미등록 | `bindings.json`에 패키지와 컴포넌트 추가 후 재설치 |
+| `모듈에 없는 컴포넌트` | `bindings.json`의 `components`에 해당 컴포넌트 미등록 | `components` 배열에 추가 후 재설치 |
 
 ### 일반적인 실수
 
@@ -1359,6 +1427,29 @@ list.map(items, fn(item) {
 ```gleam
 // glendix/mendix/date가 자동으로 1-based ↔ 0-based 변환합니다
 let month = date.month(my_date)  // 1~12 (Gleam 기준, 변환 불필요)
+```
+
+**4. 외부 React 컴포넌트용 `.mjs` 파일을 직접 작성하지 마세요:**
+
+```gleam
+// 잘못된 방법 — 수동 FFI 작성
+// recharts_ffi.mjs를 만들고 @external로 연결하는 것
+
+// 올바른 방법 — bindings.json + glendix/binding 사용
+import glendix/binding
+let rc = binding.module("recharts")
+let pie = binding.resolve(rc, "PieChart")
+react.component(pie, props, children)
+```
+
+**5. `binding.resolve()`에서 컴포넌트 이름을 snake_case로 바꾸지 마세요:**
+
+```gleam
+// 잘못된 예
+binding.resolve(m(), "pie_chart")
+
+// 올바른 예 — JavaScript 원본 이름(PascalCase) 그대로 사용
+binding.resolve(m(), "PieChart")
 ```
 
 ---

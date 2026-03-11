@@ -43,7 +43,7 @@ React FFI와 Mendix API 바인딩은 별도 Hex 패키지 [glendix](https://hexd
 ```toml
 # gleam.toml
 [dependencies]
-glendix = ">= 1.1.0 and < 2.0.0"
+glendix = ">= 1.2.0 and < 2.0.0"
 ```
 
 glendix가 제공하는 모듈:
@@ -54,6 +54,7 @@ React:
 - `glendix/react/hook` — React Hooks (`use_state`, `use_effect`, `use_effect_cleanup`, `use_memo`, `use_callback`, `use_ref`)
 - `glendix/react/event` — 이벤트 타입 + `target_value`, `prevent_default`, `stop_propagation`, `key`
 - `glendix/react/html` — HTML 태그 편의 함수 (순수 Gleam, FFI 없음) — `div`, `span`, `input`, `button` 등
+- `glendix/binding` — 외부 React 컴포넌트 바인딩 (`bindings.json` + `binding.module`/`binding.resolve`)
 
 Mendix:
 - `glendix/mendix` — 핵심 타입(`ValueStatus`, `ObjectItem`) + JsProps 접근자(`get_prop`, `get_string_prop`, `has_prop`) + Option 변환 유틸리티
@@ -138,7 +139,7 @@ gleam format                     # Gleam 코드 포맷팅
 `docs/glendix_guide.md` 파일에 glendix 패키지의 사용법이 수록되어 있다. 주요 내용:
 - 프로젝트 설정 및 첫 번째 위젯 만들기
 - 핵심 개념: opaque 타입, undefined ↔ Option 변환, 파이프라인 API
-- React 바인딩: 엘리먼트 생성(`el`/`el_`/`void`), Props 빌더, HTML 태그 함수, Hooks(`use_state`/`use_effect`/`use_memo`/`use_callback`/`use_ref`), 이벤트 처리, 조건부/리스트 렌더링, 스타일
+- React 바인딩: 엘리먼트 생성(`el`/`el_`/`void`), Props 빌더, HTML 태그 함수, Hooks(`use_state`/`use_effect`/`use_memo`/`use_callback`/`use_ref`), 이벤트 처리, 조건부/리스트 렌더링, 스타일, 외부 React 컴포넌트 바인딩(`bindings.json`)
 - Mendix 바인딩: Props 접근, ValueStatus, EditableValue, ActionValue, DynamicValue, ListValue(페이지네이션/정렬), ListAttribute, Selection, Reference, Filter 빌더, JsDate, Big, FileValue/WebIcon/ValueFormatter
 - 실전 패턴: 폼 입력 위젯, 데이터 테이블, 검색 가능 리스트, 컴포넌트 합성
 - 트러블슈팅: 빌드/런타임 에러, Hook 규칙
