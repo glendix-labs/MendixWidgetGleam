@@ -87,7 +87,7 @@ pub fn widget(props: JsProps) -> ReactElement {
 ### 설치
 
 ```bash
-gleam run -m glendix/install   # Gleam 의존성 자동 다운로드 + npm 의존성 설치
+gleam run -m glendix/install   # Gleam 의존성 자동 다운로드 + npm 의존성 설치 + 바인딩 코드 생성 (외부 React 패키지는 사전에 수동 설치 필요)
 ```
 
 ### 빌드
@@ -111,7 +111,7 @@ gleam run -m glendix/start     # Mendix 테스트 프로젝트와 연동 개발
 
 | 명령어 | 설명 |
 |--------|------|
-| `gleam run -m glendix/install` | 의존성 설치 (Gleam + npm) |
+| `gleam run -m glendix/install` | 의존성 설치 (Gleam + npm) + 바인딩 코드 생성 |
 | `gleam run -m glendix/build` | 프로덕션 빌드 (.mpk 생성) |
 | `gleam run -m glendix/dev` | 개발 서버 (HMR, port 3000) |
 | `gleam run -m glendix/start` | Mendix 테스트 프로젝트 연동 |

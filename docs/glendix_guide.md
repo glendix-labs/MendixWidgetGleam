@@ -214,9 +214,22 @@ react.none()  // React null 반환
 }
 ```
 
-**2단계: `gleam run -m glendix/install`** 실행 (바인딩 자동 생성)
+**2단계: 패키지 설치** — `bindings.json`에 등록한 패키지는 위젯 프로젝트의 `node_modules`에 설치되어 있어야 합니다. 생성된 `binding_ffi.mjs`가 해당 패키지를 직접 import하므로, Rollup이 번들링할 때 resolve할 수 있어야 합니다.
 
-**3단계: 순수 Gleam 래퍼 모듈 작성** (편의용, 선택사항)
+```bash
+# 사용 중인 패키지 매니저에 맞게 설치
+npm install recharts
+# 또는
+pnpm add recharts
+# 또는
+yarn add recharts
+# 또는
+bun add recharts
+```
+
+**3단계: `gleam run -m glendix/install`** 실행 (바인딩 자동 생성)
+
+**4단계: 순수 Gleam 래퍼 모듈 작성** (편의용, 선택사항)
 
 ```gleam
 // src/chart/recharts.gleam — 순수 Gleam, FFI 없음!
@@ -235,7 +248,7 @@ pub fn responsive_container() -> Component {
 }
 ```
 
-**4단계: 위젯에서 사용**
+**5단계: 위젯에서 사용**
 
 ```gleam
 import chart/recharts
@@ -1381,6 +1394,7 @@ pub fn dashboard(props) -> ReactElement {
 | `set_value` 호출 시 에러 | read_only 상태에서 값 설정 | `ev.is_editable(attr)` 확인 후 설정 |
 | Hook 순서 에러 | 조건부로 Hook 호출 | Hook은 항상 동일한 순서로 호출해야 함 (React Rules of Hooks) |
 | `바인딩이 생성되지 않았습니다` | `binding_ffi.mjs`가 스텁 상태 | `gleam run -m glendix/install` 실행 |
+| `could not be resolved – treating it as an external dependency` | `bindings.json`에 등록한 패키지가 `node_modules`에 없음 | `npm install <패키지명>` 등으로 설치 후 재빌드 |
 | `바인딩에 등록되지 않은 모듈` | `bindings.json`에 해당 패키지 미등록 | `bindings.json`에 패키지와 컴포넌트 추가 후 재설치 |
 | `모듈에 없는 컴포넌트` | `bindings.json`의 `components`에 해당 컴포넌트 미등록 | `components` 배열에 추가 후 재설치 |
 
