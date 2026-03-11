@@ -17,6 +17,9 @@ bun.lock
 .pnpmfile.cjs
 .npmignore
 
+# Gleam lock 파일
+manifest.toml
+
 # Gleam 컴파일 출력
 build/
 
