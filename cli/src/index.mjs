@@ -192,6 +192,9 @@ src/
   package.xml                         # Mendix 패키지 매니페스트
   ui/
     ${names.pascalCase}.css             # 위젯 스타일시트
+widgets/                                # .mpk 위젯 파일 (glendix/widget로 바인딩)
+bindings.json                           # 외부 React 컴포넌트 바인딩 설정
+package.json                            # npm 의존성 (React, 외부 라이브러리 등)
 gleam.toml                            # Gleam 프로젝트 설정 (glendix 의존성 포함)
 docs/
   gleam_language_tour.md              # Gleam 언어 레퍼런스
@@ -231,8 +234,8 @@ gleam format                     # Gleam 코드 포맷팅
 
 \`docs/glendix_guide.md\` 파일에 glendix 패키지의 사용법이 수록되어 있다. 주요 내용:
 - 프로젝트 설정 및 첫 번째 위젯 만들기
-- 핵심 개념: opaque 타입, undefined ↔ Option 변환, 파이프라인 API
-- React 바인딩: 엘리먼트 생성, Props 빌더, HTML 태그 함수, Hooks, 이벤트 처리, 조건부/리스트 렌더링, 스타일
+- 핵심 개념: opaque 타입, undefined ↔ Option 변환, Attribute 리스트 API
+- React 바인딩: 엘리먼트 생성, Attribute 리스트, HTML 태그 함수, Hooks, 이벤트 처리, 조건부/리스트 렌더링, 스타일, 외부 React 컴포넌트 바인딩, .mpk 위젯 바인딩
 - Mendix 바인딩: Props 접근, ValueStatus, EditableValue, ActionValue, DynamicValue, ListValue, ListAttribute, Selection, Reference, Filter, JsDate, Big 등
 - 실전 패턴: 폼 입력 위젯, 데이터 테이블, 검색 가능 리스트, 컴포넌트 합성
 - 트러블슈팅
@@ -240,12 +243,15 @@ gleam format                     # Gleam 코드 포맷팅
 ## glendix Modules
 
 React:
-- \`glendix/react\` — 핵심 타입 + createElement + fragment/text/none + 조건부 렌더링
-- \`glendix/react/prop\` — Props 파이프라인 빌더
-- \`glendix/react/hook\` — React Hooks (useState, useEffect 등)
-- \`glendix/react/event\` — 이벤트 타입 + 값 추출
-- \`glendix/react/html\` — HTML 태그 편의 함수
+- \`glendix/react\` — 핵심 타입 + element/element_/void_element/component_el + fragment/text/none + 조건부 렌더링 + define_component/memo/Context
+- \`glendix/react/attribute\` — Attribute 리스트 API (90+ HTML 속성 함수)
+- \`glendix/react/hook\` — React Hooks (useState, useEffect, useMemo, useCallback, useRef 등)
+- \`glendix/react/event\` — 15개 이벤트 타입 + 148+ 핸들러 Attribute + 67+ 접근자
+- \`glendix/react/html\` — 75+ HTML 태그 편의 함수
+- \`glendix/react/svg\` — 57 SVG 요소 편의 함수
+- \`glendix/react/svg_attribute\` — 97+ SVG 전용 속성 함수
 - \`glendix/binding\` — 외부 React 컴포넌트 바인딩
+- \`glendix/widget\` — .mpk 위젯 컴포넌트 바인딩
 
 Mendix:
 - \`glendix/mendix\` — \`ValueStatus\`, \`ObjectItem\`, Props 접근자
@@ -255,7 +261,8 @@ Mendix:
 - \`glendix/mendix/list_value\` — 리스트 데이터 + 정렬/필터
 - \`glendix/mendix/list_attribute\` — 리스트 아이템별 접근
 - \`glendix/mendix/selection\` — 단일/다중 선택
-- \`glendix/mendix/reference\` — 참조 관계 값
+- \`glendix/mendix/reference\` — 단일 연관 참조
+- \`glendix/mendix/reference_set\` — 다중 연관 참조
 - \`glendix/mendix/date\` — JS Date 래퍼
 - \`glendix/mendix/big\` — Big.js 고정밀 십진수 래퍼
 - \`glendix/mendix/file\` — 파일/이미지
@@ -287,6 +294,44 @@ async function generateReadme(targetDir, names, pm, pmConfig) {
   const content = `# ${names.pascalCase}
 
 Gleam 언어로 작성된 Mendix Pluggable Widget.
+
+## 핵심 원리
+
+Gleam 함수 \`fn(JsProps) -> ReactElement\`는 React 함수형 컴포넌트와 동일한 시그니처다. glendix가 React 원시 함수와 Mendix 런타임 타입 접근자를 타입 안전하게 제공하므로, 위젯 프로젝트에서는 비즈니스 로직에만 집중하면 된다.
+
+\`\`\`gleam
+// src/${names.snakeCase}.gleam
+import glendix/mendix
+import glendix/react.{type JsProps, type ReactElement}
+import glendix/react/attribute
+import glendix/react/html
+
+pub fn widget(props: JsProps) -> ReactElement {
+  let sample_text = mendix.get_string_prop(props, "sampleText")
+  html.div([attribute.class("widget-hello-world")], [
+    react.text("Hello " <> sample_text),
+  ])
+}
+\`\`\`
+
+Mendix 복합 타입도 Gleam에서 타입 안전하게 사용할 수 있다:
+
+\`\`\`gleam
+import glendix/mendix
+import glendix/mendix/editable_value
+import glendix/mendix/action
+
+pub fn widget(props: JsProps) -> ReactElement {
+  // EditableValue 접근
+  let name_attr: EditableValue = mendix.get_prop_required(props, "name")
+  let display = editable_value.display_value(name_attr)
+
+  // ActionValue 실행
+  let on_save: Option(ActionValue) = mendix.get_prop(props, "onSave")
+  action.execute_action(on_save)
+  // ...
+}
+\`\`\`
 
 ## 시작하기
 
@@ -338,9 +383,108 @@ src/
   components/
     hello_world.gleam            # Hello World 공유 컴포넌트
   ${names.pascalCase}.xml            # 위젯 속성 정의
+widgets/                           # .mpk 위젯 파일 (glendix/widget로 바인딩)
+bindings.json                      # 외부 React 컴포넌트 바인딩 설정
+package.json                       # npm 의존성 (React, 외부 라이브러리 등)
 \`\`\`
 
 React/Mendix FFI 바인딩은 [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공됩니다.
+
+## 외부 React 컴포넌트 사용
+
+npm 패키지로 제공되는 React 컴포넌트 라이브러리를 \`.mjs\` FFI 파일 작성 없이 순수 Gleam에서 사용할 수 있다.
+
+### 1단계: npm 패키지 설치
+
+\`\`\`bash
+${pm === "npm" ? "npm install" : pm === "yarn" ? "yarn add" : pm === "pnpm" ? "pnpm add" : "bun add"} recharts
+\`\`\`
+
+### 2단계: \`bindings.json\` 작성
+
+프로젝트 루트에 \`bindings.json\`을 생성하고, 사용할 컴포넌트를 등록한다:
+
+\`\`\`json
+{
+  "recharts": {
+    "components": ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
+  }
+}
+\`\`\`
+
+### 3단계: 바인딩 생성
+
+\`\`\`bash
+gleam run -m glendix/install
+\`\`\`
+
+\`binding_ffi.mjs\`가 자동 생성된다. 이후 \`gleam run -m glendix/build\` 등 빌드 시에도 자동 갱신된다.
+
+### 4단계: Gleam에서 사용
+
+\`\`\`gleam
+import glendix/binding
+import glendix/react.{type ReactElement}
+import glendix/react/attribute.{type Attribute}
+
+fn m() { binding.module("recharts") }
+
+pub fn pie_chart(attrs: List(Attribute), children: List(ReactElement)) -> ReactElement {
+  react.component_el(binding.resolve(m(), "PieChart"), attrs, children)
+}
+
+pub fn tooltip(attrs: List(Attribute)) -> ReactElement {
+  react.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
+}
+\`\`\`
+
+\`html.div\`와 동일한 호출 패턴으로 외부 React 컴포넌트를 사용할 수 있다.
+
+## .mpk 위젯 컴포넌트 사용
+
+\`widgets/\` 디렉토리에 \`.mpk\` 파일(Mendix 위젯 빌드 결과물)을 배치하면, 다른 위젯 안에서 기존 Mendix 위젯을 React 컴포넌트로 렌더링할 수 있다.
+
+### 1단계: \`.mpk\` 파일 배치
+
+\`\`\`
+프로젝트 루트/
+├── widgets/
+│   ├── Switch.mpk
+│   └── Badge.mpk
+├── src/
+└── gleam.toml
+\`\`\`
+
+### 2단계: 바인딩 생성
+
+\`\`\`bash
+gleam run -m glendix/install
+\`\`\`
+
+실행 시 다음이 자동 처리된다:
+- \`.mpk\`에서 \`.mjs\`/\`.css\`를 추출하고 \`widget_ffi.mjs\`가 생성된다
+- \`.mpk\` XML의 \`<property>\` 정의가 부모 위젯 XML에 자동 주입된다
+
+### 3단계: Gleam에서 사용
+
+\`\`\`gleam
+import glendix/mendix
+import glendix/widget
+import glendix/react
+import glendix/react/attribute
+
+// props에서 자동 주입된 속성을 읽어 위젯에 전달
+let boolean_attr = mendix.get_prop_required(props, "booleanAttribute")
+let action = mendix.get_prop_required(props, "action")
+
+let switch_comp = widget.component("Switch")
+react.component_el(switch_comp, [
+  attribute.attribute("booleanAttribute", boolean_attr),
+  attribute.attribute("action", action),
+], [])
+\`\`\`
+
+위젯 이름은 \`.mpk\` 내부 XML의 \`<name>\` 값(PascalCase)을, property key는 \`.mpk\` XML의 원본 key를 그대로 사용한다.
 
 ## 기술 스택
 

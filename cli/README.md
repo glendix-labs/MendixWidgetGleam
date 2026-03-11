@@ -27,7 +27,10 @@ my-widget/
     editor_preview.gleam       # Studio Pro 디자인 뷰 미리보기
     components/
       hello_world.gleam      # Hello World 공유 컴포넌트
-  gleam.toml                   # Gleam 프로젝트 설정 (glendix >= 1.2.0 의존성 포함)
+  widgets/                       # .mpk 위젯 파일 (glendix/widget로 바인딩)
+  bindings.json                  # 외부 React 컴포넌트 바인딩 설정
+  package.json                   # npm 의존성 (React, 외부 라이브러리 등)
+  gleam.toml                   # Gleam 프로젝트 설정 (glendix >= 2.0.0 의존성 포함)
   CLAUDE.md                    # AI 어시스턴트용 프로젝트 컨텍스트
 ```
 
@@ -46,8 +49,8 @@ gleam run -m glendix/build     # 프로덕션 빌드 (.mpk 생성)
 
 생성된 프로젝트는 [glendix](https://hexdocs.pm/glendix/) Hex 패키지를 의존성으로 사용한다. glendix가 React 원시 함수와 Mendix Pluggable Widget API 전체에 대한 타입 안전한 Gleam 바인딩을 제공한다:
 
-- **React** — `react`, `react/prop`, `react/hook`, `react/event`, `react/html`
-- **Mendix** — `mendix`, `mendix/editable_value`, `mendix/action`, `mendix/list_value`, `mendix/selection`, `mendix/reference`, `mendix/date`, `mendix/big`, `mendix/filter` 등
+- **React** — `react`, `react/attribute`, `react/hook`, `react/event`, `react/html`, `react/svg`, `react/svg_attribute`, `binding`, `widget`
+- **Mendix** — `mendix`, `mendix/editable_value`, `mendix/action`, `mendix/list_value`, `mendix/selection`, `mendix/reference`, `mendix/reference_set`, `mendix/date`, `mendix/big`, `mendix/filter` 등
 
 ## 라이선스
 
