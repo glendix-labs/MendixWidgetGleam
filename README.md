@@ -25,7 +25,7 @@ src/
 widgets/                                # .mpk 위젯 파일 (glendix/widget로 바인딩)
 bindings.json                           # 외부 React 컴포넌트 바인딩 설정
 package.json                            # npm 의존성 (React, 외부 라이브러리 등)
-gleam.toml                            # glendix >= 2.0.2 의존성 포함
+gleam.toml                            # glendix >= 2.0.3 의존성 포함
 ```
 
 React/Mendix FFI 바인딩은 이 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공된다.
