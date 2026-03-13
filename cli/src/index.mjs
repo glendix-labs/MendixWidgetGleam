@@ -132,6 +132,37 @@ export async function main(args) {
     console.error(`  ${CYAN}${pmConfig.install}${RESET}\n`);
   }
 
+  // Playwright Chromium 브라우저 설치 (미설치 시에만)
+  try {
+    const chromiumExists =
+      execSync(
+        `node -e "const fs=require('fs'),pw=require('playwright');process.stdout.write(String(fs.existsSync(pw.chromium.executablePath())))"`,
+        { cwd: targetDir, encoding: "utf-8", stdio: ["pipe", "pipe", "ignore"] },
+      ).trim() === "true";
+
+    if (!chromiumExists) {
+      console.log(`\n${BOLD}Playwright Chromium 설치 중...${RESET}\n`);
+      try {
+        execSync("npx playwright install chromium", {
+          cwd: targetDir,
+          stdio: "inherit",
+        });
+        console.log(`\n${GREEN}✓${RESET} Playwright Chromium 설치 완료`);
+      } catch {
+        console.error(
+          `\n${YELLOW}⚠ Playwright 브라우저 설치 실패. 프로젝트 디렉토리에서 직접 실행하세요:${RESET}`,
+        );
+        console.error(
+          `  ${CYAN}npx playwright install chromium${RESET}\n`,
+        );
+      }
+    } else {
+      console.log(`${GREEN}✓${RESET} Playwright Chromium 이미 설치됨`);
+    }
+  } catch {
+    // playwright 패키지 미설치 시 무시
+  }
+
   // 프로덕션 빌드
   console.log(`\n${BOLD}위젯 빌드 중...${RESET}\n`);
   try {

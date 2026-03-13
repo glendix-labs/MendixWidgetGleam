@@ -19,7 +19,8 @@
     "prerelease": "echo skipping lint"
   },
   "devDependencies": {
-    "@mendix/pluggable-widgets-tools": "^11.8.0"
+    "@mendix/pluggable-widgets-tools": "^11.8.0",
+    "playwright": "^1.58.2"
   },
   "dependencies": {
     "classnames": "^2.5.1"
