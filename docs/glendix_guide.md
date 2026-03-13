@@ -322,71 +322,69 @@ react.component_el(binding.resolve(rc, "PieChart"), attrs, children)
 react.void_component_el(binding.resolve(rc, "Tooltip"), attrs)
 ```
 
-#### .mpk 위젯 컴포넌트 사용
+## .mpk 위젯 컴포넌트 사용
 
-`glendix/widget` 모듈로 `widgets/` 디렉토리의 `.mpk` 파일(Mendix 위젯 빌드 결과물)을 React 컴포넌트로 사용합니다. 다른 위젯 안에서 기존 Mendix 위젯을 렌더링할 때 유용합니다.
+`widgets/` 디렉토리에 `.mpk` 파일(Mendix 위젯 빌드 결과물)을 배치하면, 다른 위젯 안에서 기존 Mendix 위젯을 React 컴포넌트로 렌더링할 수 있다.
 
-**1단계: `.mpk` 파일 배치**
-
-프로젝트 루트에 `widgets/` 디렉토리를 만들고 `.mpk` 파일을 복사합니다:
+### 1단계: `.mpk` 파일 배치
 
 ```
-my_widget/
+프로젝트 루트/
 ├── widgets/
 │   ├── Switch.mpk
 │   └── Badge.mpk
 ├── src/
-├── gleam.toml
-└── ...
+└── gleam.toml
 ```
 
-**2단계: `gleam run -m glendix/install`** 실행 (위젯 바인딩 자동 생성)
+### 2단계: 바인딩 생성
 
-install 시 두 가지가 자동 수행됩니다:
-- `.mpk` 내부의 `.mjs`와 `.css`가 추출되고, `widget_ffi.mjs`가 생성됩니다
-- `.mpk` XML의 `<property>` 정의가 부모 위젯 XML(`src/{WidgetName}.xml`)에 `<propertyGroup caption="{위젯명}">` 으로 자동 주입됩니다 (동일 caption이 이미 있으면 건너뜀)
-
-예를 들어 `Switch.mpk`를 설치하면, 부모 위젯 XML에 다음이 자동 추가됩니다:
-
-```xml
-<propertyGroup caption="Switch">
-    <property key="booleanAttribute" type="attribute">
-        <caption>Boolean attribute</caption>
-        <description>Attribute to toggle</description>
-        <attributeTypes>
-            <attributeType name="Boolean" />
-        </attributeTypes>
-    </property>
-    <property key="action" type="action" required="false">
-        <caption>On change</caption>
-        <description>Action to be performed when the switch is toggled</description>
-    </property>
-</propertyGroup>
+```bash
+gleam run -m glendix/install
 ```
 
-**3단계: Gleam 코드에서 사용**
+실행 시 다음이 자동 처리된다:
+- `.mpk`에서 `.mjs`/`.css`를 추출하고 `widget_ffi.mjs`가 생성된다
+- `.mpk` XML의 `<property>` 정의를 파싱하여 `src/widgets/`에 바인딩 `.gleam` 파일이 자동 생성된다 (이미 존재하면 건너뜀)
+
+### 3단계: 자동 생성된 `src/widgets/*.gleam` 파일 확인
 
 ```gleam
+// src/widgets/switch.gleam (자동 생성)
 import glendix/mendix
-import glendix/widget
-import glendix/react
+import glendix/react.{type JsProps, type ReactElement}
 import glendix/react/attribute
+import glendix/widget
 
-// props에서 자동 주입된 속성을 읽어 위젯에 전달
-let boolean_attr = mendix.get_prop_required(props, "booleanAttribute")
-let action = mendix.get_prop_required(props, "action")
+/// Switch 위젯 렌더링 - props에서 속성을 읽어 위젯에 전달
+pub fn render(props: JsProps) -> ReactElement {
+  let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
+  let action = mendix.get_prop_required(props, "action")
 
-// widgets/Switch.mpk의 Switch 컴포넌트 사용
-let switch_comp = widget.component("Switch")
-react.component_el(switch_comp, [
-  attribute.attribute("booleanAttribute", boolean_attr),
-  attribute.attribute("action", action),
-], [])
+  let comp = widget.component("Switch")
+  react.component_el(
+    comp,
+    [
+      attribute.attribute("booleanAttribute", boolean_attribute),
+      attribute.attribute("action", action),
+    ],
+    [],
+  )
+}
 ```
 
-위젯의 Props는 기존 `attribute.attribute(key, value)` 범용 함수로 전달합니다. 위젯 이름은 `.mpk` 내부 XML의 `<name>` 태그 값(PascalCase)을, property key는 `.mpk` XML의 원본 key를 그대로 사용합니다.
+required/optional 속성이 자동 구분되며, 필요에 따라 생성된 파일을 자유롭게 수정할 수 있다.
 
-> `binding` 모듈과 달리 `widget` 모듈은 1 mpk = 1 컴포넌트이므로 `module` + `resolve` 2단계 없이 `component("Name")` 한 번에 가져옵니다.
+### 4단계: 위젯에서 사용
+
+```gleam
+import widgets/switch
+
+// 컴포넌트 내부에서
+switch.render(props)
+```
+
+위젯 이름은 `.mpk` 내부 XML의 `<name>` 값을, property key는 `.mpk` XML의 원본 key를 그대로 사용한다.
 
 ### 3.2 HTML 속성
 
