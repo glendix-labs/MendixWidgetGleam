@@ -1706,6 +1706,86 @@ case formatter.parse(fmt, "123.45") {
 }
 ```
 
+### 4.12 Editor Configuration — 조건부 속성 제어
+
+Studio Pro의 editorConfig에서 속성을 조건부로 숨기거나, 그룹을 탭으로 변환하는 등의 작업을 순수 Gleam으로 작성할 수 있습니다. `@mendix/pluggable-widgets-tools`의 헬퍼 함수를 래핑합니다.
+
+#### Properties 타입
+
+`Properties`는 Studio Pro가 `getProperties`에 전달하는 `PropertyGroup[]` 배열의 opaque 래퍼입니다. 모든 함수가 `Properties`를 반환하므로 파이프라인 체이닝이 가능합니다.
+
+#### 속성 숨기기
+
+```gleam
+import glendix/editor_config.{type Properties}
+
+// 단일 속성 숨기기
+let props = editor_config.hide_property(default_properties, "barWidth")
+
+// 여러 속성 한 번에 숨기기
+let props = editor_config.hide_properties(default_properties, ["barWidth", "barColor"])
+
+// 중첩 속성 숨기기 (배열 타입 속성의 특정 인덱스 내부)
+let props = editor_config.hide_nested_property(default_properties, "columns", 0, "width")
+
+// 여러 중첩 속성 한 번에 숨기기
+let props = editor_config.hide_nested_properties(default_properties, "columns", 0, ["width", "alignment"])
+```
+
+#### 탭 변환 / 속성 순서 변경
+
+```gleam
+// 속성 그룹을 탭으로 변환 (웹 플랫폼용)
+let props = editor_config.transform_groups_into_tabs(default_properties)
+
+// 속성 순서 변경 (from_index → to_index)
+let props = editor_config.move_property(default_properties, 0, 2)
+```
+
+#### 실전 예시 — 차트 유형별 조건부 속성
+
+사용자의 `src/editor_config.gleam`에서 `getProperties` 로직을 작성합니다. 이 파일이 존재하면 `run_with_bridge` 실행 시 editorConfig 브릿지 JS가 자동 생성됩니다.
+
+```gleam
+import glendix/editor_config.{type Properties}
+import glendix/mendix
+import glendix/react.{type JsProps}
+
+pub fn get_properties(
+  values: JsProps,
+  default_properties: Properties,
+  platform: String,
+) -> Properties {
+  let chart_type = mendix.get_string_prop(values, "chartType")
+
+  let props = case chart_type {
+    "line" ->
+      default_properties
+      |> editor_config.hide_properties(["barWidth", "barColor"])
+    "bar" ->
+      default_properties
+      |> editor_config.hide_properties(["lineStyle", "lineCurve"])
+    _ -> default_properties
+  }
+
+  case platform {
+    "web" -> editor_config.transform_groups_into_tabs(props)
+    _ -> props
+  }
+}
+```
+
+#### 함수 요약
+
+| 함수 | 설명 |
+|------|------|
+| `hide_property(properties, key)` | 단일 속성 숨기기 |
+| `hide_properties(properties, keys)` | 여러 속성 한 번에 숨기기 |
+| `hide_nested_property(properties, key, index, nested_key)` | 중첩 속성 숨기기 |
+| `hide_nested_properties(properties, key, index, nested_keys)` | 여러 중첩 속성 숨기기 |
+| `transform_groups_into_tabs(properties)` | 그룹 → 탭 변환 |
+| `move_property(properties, from_index, to_index)` | 속성 순서 변경 |
+
 ---
 
 ## 5. 실전 패턴

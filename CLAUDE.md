@@ -29,6 +29,8 @@ src/
   ui/
     MendixWidget.css                  # 위젯 스타일시트
 widgets/                                # .mpk 위젯 파일 (glendix/widget로 바인딩)
+bindings.json                           # 외부 React 컴포넌트 바인딩 설정
+package.json                            # npm 의존성 (React, 빌드 도구 등)
 cli/                                  # CLI 스캐폴딩 도구 (create-mendix-widget-gleam)
   template/                           #   프로젝트 템플릿
 gleam.toml                            # Gleam 프로젝트 설정
@@ -44,7 +46,7 @@ React FFI와 Mendix API 바인딩은 별도 Hex 패키지 [glendix](https://hexd
 ```toml
 # gleam.toml
 [dependencies]
-glendix = ">= 2.0.4 and < 3.0.0"
+glendix = ">= 2.0.8 and < 3.0.0"
 ```
 
 glendix가 제공하는 모듈:
