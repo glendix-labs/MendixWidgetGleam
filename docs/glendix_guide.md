@@ -1708,6 +1708,8 @@ case formatter.parse(fmt, "123.45") {
 
 Studio Pro의 editorConfig에서 속성을 조건부로 숨기거나, 그룹을 탭으로 변환하는 등의 작업을 순수 Gleam으로 작성할 수 있습니다. `@mendix/pluggable-widgets-tools`의 헬퍼 함수를 래핑합니다.
 
+> **Jint 호환성**: Studio Pro는 editorConfig를 **Jint**(.NET JavaScript 엔진)로 실행합니다. Jint는 Gleam 컴파일러가 생성하는 `List` 런타임(WeakMap, Symbol.iterator, class inheritance)을 지원하지 않으므로, 이 모듈의 모든 함수는 `List` 타입을 사용하지 않습니다. 여러 키를 전달할 때는 **콤마 구분 String**을 사용합니다.
+
 #### Properties 타입
 
 `Properties`는 Studio Pro가 `getProperties`에 전달하는 `PropertyGroup[]` 배열의 opaque 래퍼입니다. 모든 함수가 `Properties`를 반환하므로 파이프라인 체이닝이 가능합니다.
@@ -1720,14 +1722,14 @@ import glendix/editor_config.{type Properties}
 // 단일 속성 숨기기
 let props = editor_config.hide_property(default_properties, "barWidth")
 
-// 여러 속성 한 번에 숨기기
-let props = editor_config.hide_properties(default_properties, ["barWidth", "barColor"])
+// 여러 속성 한 번에 숨기기 (콤마 구분 String)
+let props = editor_config.hide_properties(default_properties, "barWidth,barColor")
 
 // 중첩 속성 숨기기 (배열 타입 속성의 특정 인덱스 내부)
 let props = editor_config.hide_nested_property(default_properties, "columns", 0, "width")
 
-// 여러 중첩 속성 한 번에 숨기기
-let props = editor_config.hide_nested_properties(default_properties, "columns", 0, ["width", "alignment"])
+// 여러 중첩 속성 한 번에 숨기기 (콤마 구분 String)
+let props = editor_config.hide_nested_properties(default_properties, "columns", 0, "width,alignment")
 ```
 
 #### 탭 변환 / 속성 순서 변경
@@ -1744,10 +1746,16 @@ let props = editor_config.move_property(default_properties, 0, 2)
 
 사용자의 `src/editor_config.gleam`에서 `getProperties` 로직을 작성합니다. 이 파일이 존재하면 `run_with_bridge` 실행 시 editorConfig 브릿지 JS가 자동 생성됩니다.
 
+> **주의**: editorConfig 코드에서는 Gleam `List`를 사용하지 마세요. `["a", "b"]` 같은 리스트 리터럴은 Gleam List 런타임 클래스를 번들에 포함시켜 Jint에서 크래시를 일으킵니다. 여러 키를 조합할 때는 `const`와 String 연결(`<>`)을 사용하세요.
+
 ```gleam
 import glendix/editor_config.{type Properties}
 import glendix/mendix
 import glendix/react.{type JsProps}
+
+const bar_keys = "barWidth,barColor"
+
+const line_keys = "lineStyle,lineCurve"
 
 pub fn get_properties(
   values: JsProps,
@@ -1759,10 +1767,10 @@ pub fn get_properties(
   let props = case chart_type {
     "line" ->
       default_properties
-      |> editor_config.hide_properties(["barWidth", "barColor"])
+      |> editor_config.hide_properties(bar_keys)
     "bar" ->
       default_properties
-      |> editor_config.hide_properties(["lineStyle", "lineCurve"])
+      |> editor_config.hide_properties(line_keys)
     _ -> default_properties
   }
 
@@ -1778,9 +1786,9 @@ pub fn get_properties(
 | 함수 | 설명 |
 |------|------|
 | `hide_property(properties, key)` | 단일 속성 숨기기 |
-| `hide_properties(properties, keys)` | 여러 속성 한 번에 숨기기 |
+| `hide_properties(properties, keys)` | 여러 속성 숨기기 (콤마 구분 String) |
 | `hide_nested_property(properties, key, index, nested_key)` | 중첩 속성 숨기기 |
-| `hide_nested_properties(properties, key, index, nested_keys)` | 여러 중첩 속성 숨기기 |
+| `hide_nested_properties(properties, key, index, nested_keys)` | 여러 중첩 속성 숨기기 (콤마 구분 String) |
 | `transform_groups_into_tabs(properties)` | 그룹 → 탭 변환 |
 | `move_property(properties, from_index, to_index)` | 속성 순서 변경 |
 

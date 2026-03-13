@@ -46,7 +46,7 @@ React FFI와 Mendix API 바인딩은 별도 Hex 패키지 [glendix](https://hexd
 ```toml
 # gleam.toml
 [dependencies]
-glendix = ">= 2.0.9 and < 3.0.0"
+glendix = ">= 2.0.11 and < 3.0.0"
 ```
 
 glendix가 제공하는 모듈:
