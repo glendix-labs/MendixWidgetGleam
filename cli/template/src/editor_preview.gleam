@@ -1,11 +1,11 @@
-// Mendix Studio Pro 디자인 뷰 미리보기
-// Studio Pro에서 위젯의 시각적 미리보기를 렌더링
+{{I18N:editor_preview_1}}
+{{I18N:editor_preview_2}}
 
 import components/hello_world
 import glendix/mendix
 import glendix/react.{type JsProps, type ReactElement}
 
-/// Studio Pro 디자인 뷰 미리보기 - 위젯의 시각적 표현을 렌더링
+{{I18N:editor_preview_doc}}
 pub fn preview(props: JsProps) -> ReactElement {
   let sample_text = mendix.get_string_prop(props, "sampleText")
   hello_world.render(sample_text)

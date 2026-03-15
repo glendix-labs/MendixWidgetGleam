@@ -1,58 +1,58 @@
-# 의존성
+{{I18N:gitignore_deps}}
 node_modules/
 .yarn/
 .pnp.*
 
-# 패키지 매니저 lock 파일
+{{I18N:gitignore_lockfiles}}
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 bun.lockb
 bun.lock
 
-# 패키지 매니저 캐시/설정
+{{I18N:gitignore_pm_cache}}
 .npmrc
 .yarnrc
 .yarnrc.yml
 .pnpmfile.cjs
 .npmignore
 
-# Gleam 컴파일 출력
+{{I18N:gitignore_gleam_build}}
 build/
 
-# Mendix 위젯 빌드 출력
+{{I18N:gitignore_mendix_build}}
 dist/
 
-# 환경 변수
+{{I18N:gitignore_env}}
 .env
 
-# 로그
+{{I18N:gitignore_logs}}
 *.log
 
-# OS
+{{I18N:gitignore_os}}
 .DS_Store
 
-# IDE
+{{I18N:gitignore_ide}}
 .idea/
 .vscode/
 *.launch
 
-# Mendix 테스트 프로젝트
+{{I18N:gitignore_test_project}}
 tests/testProject/
 
-# 테스트 산출물
+{{I18N:gitignore_test_artifacts}}
 coverage/
 **/e2e/diffs/
 **/screenshot/
 **/screenshot-results/
 **/artifacts/
 
-# 자동 생성 브릿지 파일 (glendix가 빌드 시 생성/삭제)
+{{I18N:gitignore_bridge}}
 src/*.js
 
-# AI
+{{I18N:gitignore_ai}}
 .claude/
 
-# Mendix marketplace 캐시/설정
+{{I18N:gitignore_marketplace}}
 .marketplace-cache/
 

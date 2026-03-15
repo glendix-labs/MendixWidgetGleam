@@ -35,14 +35,21 @@ function replaceFileName(name, names) {
 }
 
 /** 파일 내용에서 플레이스홀더 치환 */
-function replaceContent(content, names, pmConfig) {
-  return content
+function replaceContent(content, names, pmConfig, templateComments) {
+  let result = content
     .replace(/\{\{PASCAL_CASE\}\}/g, names.pascalCase)
     .replace(/\{\{SNAKE_CASE\}\}/g, names.snakeCase)
     .replace(/\{\{LOWERCASE\}\}/g, names.lowerCase)
     .replace(/\{\{DISPLAY_NAME\}\}/g, names.displayName)
-    .replace(/\{\{KEBAB_CASE\}\}/g, names.kebabCase)
-;
+    .replace(/\{\{KEBAB_CASE\}\}/g, names.kebabCase);
+
+  if (templateComments) {
+    result = result.replace(/\{\{I18N:(\w+)\}\}/g, (_, key) => {
+      return templateComments[key] ?? `{{I18N:${key}}}`;
+    });
+  }
+
+  return result;
 }
 
 /**
@@ -51,8 +58,9 @@ function replaceContent(content, names, pmConfig) {
  * @param {string} targetDir - 생성할 프로젝트 디렉토리 경로
  * @param {object} names - 이름 변환 결과
  * @param {object} pmConfig - 패키지 매니저 설정
+ * @param {object} [templateComments] - i18n 템플릿 주석 ({{I18N:*}} 치환용)
  */
-export async function scaffold(templateDir, targetDir, names, pmConfig) {
+export async function scaffold(templateDir, targetDir, names, pmConfig, templateComments) {
   const files = await walkDir(templateDir);
   const created = [];
 
@@ -78,7 +86,7 @@ export async function scaffold(templateDir, targetDir, names, pmConfig) {
     } else {
       // 텍스트 파일은 내용 치환
       const content = await readFile(srcPath, "utf-8");
-      const replaced = replaceContent(content, names, pmConfig);
+      const replaced = replaceContent(content, names, pmConfig, templateComments);
       await writeFile(destPath, replaced, "utf-8");
     }
 

@@ -1,49 +1,51 @@
 # MendixWidgetGleam
 
-**Gleam 언어로 Mendix Pluggable Widget을 개발하는 프로젝트.**
+**[English](README.md)** | **[한국어](README.ko.md)** | **[日本語](README.ja.md)**
 
-JSX를 사용하지 않고, Gleam 코드만으로 React 컴포넌트를 작성하여 Mendix Studio Pro에서 동작하는 위젯을 만든다. React와 Mendix API 바인딩은 [glendix](https://hexdocs.pm/glendix/) 패키지가 제공한다.
+**Build Mendix Pluggable Widgets with Gleam — no JSX required.**
 
-## 왜 Gleam인가?
+Write React components entirely in Gleam and run them as Mendix Studio Pro widgets. React and Mendix API bindings are provided by the [glendix](https://hexdocs.pm/glendix/) package.
 
-- **정적 타입 안전성** — Gleam의 강력한 타입 시스템으로 런타임 에러를 컴파일 타임에 방지
-- **불변 데이터** — 예측 가능한 상태 관리
-- **JavaScript 타겟 지원** — `gleam build --target javascript`로 ES 모듈 출력
-- **glendix 패키지** — React + Mendix API의 타입 안전한 Gleam 바인딩. `EditableValue`, `ActionValue`, `ListValue` 등 모든 Mendix Pluggable Widget API를 지원
+## Why Gleam?
 
-## 아키텍처
+- **Static type safety** — Gleam's robust type system catches runtime errors at compile time
+- **Immutable data** — Predictable state management
+- **JavaScript target support** — `gleam build --target javascript` outputs ES modules
+- **glendix package** — Type-safe Gleam bindings for React + Mendix API, supporting `EditableValue`, `ActionValue`, `ListValue` and all other Mendix Pluggable Widget API types
+
+## Architecture
 
 ```
 src/
-  mendix_widget_gleam.gleam           # 위젯 메인 모듈
-  editor_config.gleam                 # Studio Pro 속성 패널 설정
-  editor_preview.gleam                # Studio Pro 디자인 뷰 미리보기
+  mendix_widget_gleam.gleam           # Main widget module
+  editor_config.gleam                 # Studio Pro property panel configuration
+  editor_preview.gleam                # Studio Pro design view preview
   components/
-    hello_world.gleam               # Hello World 공유 컴포넌트
-  MendixWidget.xml                    # 위젯 속성 정의
-  package.xml                         # Mendix 패키지 매니페스트
-widgets/                                # .mpk 위젯 파일 (glendix/widget로 바인딩)
-bindings.json                           # 외부 React 컴포넌트 바인딩 설정
-package.json                            # npm 의존성 (React, 외부 라이브러리 등)
-gleam.toml                            # glendix >= 2.0.4 의존성 포함
+    hello_world.gleam               # Shared Hello World component
+  MendixWidget.xml                    # Widget property definitions
+  package.xml                         # Mendix package manifest
+widgets/                                # .mpk widget files (used via glendix/widget)
+bindings.json                           # External React component binding configuration
+package.json                            # npm dependencies (React, external libraries, etc.)
+gleam.toml                            # Includes glendix >= 2.0.13 dependency
 ```
 
-React/Mendix FFI 바인딩은 이 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공된다.
+React/Mendix FFI bindings are not included in this project — they are provided by the [glendix](https://hexdocs.pm/glendix/) Hex package.
 
-### 빌드 파이프라인
+### Build Pipeline
 
 ```
-위젯 코드 (.gleam) + glendix 패키지 (Hex)
-    ↓  gleam run -m glendix/build (Gleam 컴파일 자동 수행)
-ES 모듈 (.mjs) — build/dev/javascript/...
-    ↓  브릿지 JS (자동 생성)가 import
-    ↓  Rollup (pluggable-widgets-tools)
-.mpk 위젯 패키지 — dist/
+Widget code (.gleam) + glendix package (Hex)
+    |  gleam run -m glendix/build (Gleam compilation runs automatically)
+ES modules (.mjs) — build/dev/javascript/...
+    |  Bridge JS (auto-generated) handles imports
+    |  Rollup (pluggable-widgets-tools)
+.mpk widget package — dist/
 ```
 
-### 핵심 원리
+### Core Principles
 
-Gleam 함수 `fn(JsProps) -> ReactElement`는 React 함수형 컴포넌트와 동일한 시그니처다. glendix가 React 원시 함수와 Mendix 런타임 타입 접근자를 타입 안전하게 제공하므로, 위젯 프로젝트에서는 비즈니스 로직에만 집중하면 된다.
+The Gleam function `fn(JsProps) -> ReactElement` has an identical signature to a React functional component. glendix provides type-safe access to React primitives and Mendix runtime type accessors, so widget projects need only focus on business logic.
 
 ```gleam
 // src/mendix_widget_gleam.gleam
@@ -60,7 +62,7 @@ pub fn widget(props: JsProps) -> ReactElement {
 }
 ```
 
-Mendix 복합 타입도 Gleam에서 타입 안전하게 사용할 수 있다:
+Mendix complex types can also be used in a type-safe manner from Gleam:
 
 ```gleam
 import glendix/mendix
@@ -68,77 +70,77 @@ import glendix/mendix/editable_value
 import glendix/mendix/action
 
 pub fn widget(props: JsProps) -> ReactElement {
-  // EditableValue 접근
+  // Access EditableValue
   let name_attr: EditableValue = mendix.get_prop_required(props, "name")
   let display = editable_value.display_value(name_attr)
 
-  // ActionValue 실행
+  // Execute ActionValue
   let on_save: Option(ActionValue) = mendix.get_prop(props, "onSave")
   action.execute_action(on_save)
   // ...
 }
 ```
 
-## 시작하기
+## Getting Started
 
-### 사전 요구사항
+### Prerequisites
 
 - [Gleam](https://gleam.run/getting-started/installing/) (v1.0+)
 - [Node.js](https://nodejs.org/) (v16+)
-- [Mendix Studio Pro](https://marketplace.mendix.com/link/studiopro/) (위젯 테스트용)
+- [Mendix Studio Pro](https://marketplace.mendix.com/link/studiopro/) (for widget testing)
 
-### 설치
-
-```bash
-gleam run -m glendix/install   # Gleam 의존성 자동 다운로드 + npm 의존성 설치 + 바인딩 코드 생성 (외부 React 패키지는 사전에 수동 설치 필요)
-```
-
-### 빌드
+### Installation
 
 ```bash
-gleam run -m glendix/build     # Gleam 컴파일 + 위젯 빌드 (.mpk 생성)
+gleam run -m glendix/install   # Auto-downloads Gleam deps + installs npm deps + generates binding code (external React packages must be installed manually beforehand)
 ```
 
-빌드 결과물은 `dist/` 디렉토리에 `.mpk` 파일로 생성된다.
-
-### 개발
+### Build
 
 ```bash
-gleam run -m glendix/dev       # Gleam 컴파일 + 개발 서버 (HMR, port 3000)
-gleam run -m glendix/start     # Mendix 테스트 프로젝트와 연동 개발
+gleam run -m glendix/build     # Gleam compilation + widget build (.mpk output)
 ```
 
-## 명령어 모음
+Build artefacts are output as `.mpk` files in the `dist/` directory.
 
-모든 명령어는 `gleam`으로 통일. `gleam run -m`은 Gleam 컴파일을 자동 수행한 뒤 스크립트를 실행한다.
+### Development
 
-| 명령어 | 설명 |
-|--------|------|
-| `gleam run -m glendix/install` | 의존성 설치 (Gleam + npm) + 바인딩 코드 생성 |
-| `gleam run -m glendix/build` | 프로덕션 빌드 (.mpk 생성) |
-| `gleam run -m glendix/dev` | 개발 서버 (HMR, port 3000) |
-| `gleam run -m glendix/start` | Mendix 테스트 프로젝트 연동 |
-| `gleam run -m glendix/lint` | ESLint 실행 |
-| `gleam run -m glendix/lint_fix` | ESLint 자동 수정 |
-| `gleam run -m glendix/release` | 릴리즈 빌드 |
-| `gleam run -m glendix/marketplace` | Mendix Marketplace 위젯 검색/다운로드 |
-| `gleam build --target javascript` | Gleam → JS 컴파일만 |
-| `gleam test` | Gleam 테스트 실행 |
-| `gleam format` | Gleam 코드 포맷팅 |
+```bash
+gleam run -m glendix/dev       # Gleam compilation + dev server (HMR, port 3000)
+gleam run -m glendix/start     # Linked development with Mendix test project
+```
 
-## 외부 React 컴포넌트 사용
+## Commands
 
-npm 패키지로 제공되는 React 컴포넌트 라이브러리를 `.mjs` FFI 파일 작성 없이 순수 Gleam에서 사용할 수 있다.
+All commands are unified under `gleam`. `gleam run -m` automatically compiles Gleam before running the script.
 
-### 1단계: npm 패키지 설치
+| Command | Description |
+|---------|-------------|
+| `gleam run -m glendix/install` | Install dependencies (Gleam + npm) + generate binding code |
+| `gleam run -m glendix/build` | Production build (.mpk output) |
+| `gleam run -m glendix/dev` | Development server (HMR, port 3000) |
+| `gleam run -m glendix/start` | Linked development with Mendix test project |
+| `gleam run -m glendix/lint` | Run ESLint |
+| `gleam run -m glendix/lint_fix` | ESLint auto-fix |
+| `gleam run -m glendix/release` | Release build |
+| `gleam run -m glendix/marketplace` | Search/download Mendix Marketplace widgets |
+| `gleam build --target javascript` | Gleam to JS compilation only |
+| `gleam test` | Run Gleam tests |
+| `gleam format` | Format Gleam code |
+
+## Using External React Components
+
+React component libraries distributed as npm packages can be used from pure Gleam without writing any `.mjs` FFI files.
+
+### Step 1: Install the npm package
 
 ```bash
 npm install recharts
 ```
 
-### 2단계: `bindings.json` 작성
+### Step 2: Write `bindings.json`
 
-프로젝트 루트에 `bindings.json`을 생성하고, 사용할 컴포넌트를 등록한다:
+Create `bindings.json` at the project root and register the components you wish to use:
 
 ```json
 {
@@ -148,15 +150,15 @@ npm install recharts
 }
 ```
 
-### 3단계: 바인딩 생성
+### Step 3: Generate bindings
 
 ```bash
 gleam run -m glendix/install
 ```
 
-`binding_ffi.mjs`가 자동 생성된다. 이후 `gleam run -m glendix/build` 등 빌드 시에도 자동 갱신된다.
+A `binding_ffi.mjs` file is generated automatically. It is also regenerated on subsequent builds via `gleam run -m glendix/build`.
 
-### 4단계: Gleam에서 사용
+### Step 4: Use from Gleam
 
 ```gleam
 import glendix/binding
@@ -174,38 +176,38 @@ pub fn tooltip(attrs: List(Attribute)) -> ReactElement {
 }
 ```
 
-`html.div`와 동일한 호출 패턴으로 외부 React 컴포넌트를 사용할 수 있다.
+External React components follow the same calling pattern as `html.div`.
 
-## Mendix Marketplace 위젯 다운로드
+## Mendix Marketplace Widget Download
 
-Mendix Marketplace에서 위젯(.mpk)을 인터랙티브하게 검색하고 다운로드할 수 있다. 다운로드 완료 후 바인딩 `.gleam` 파일이 자동 생성되어 바로 사용 가능하다.
+Interactively search and download widgets (.mpk) from the Mendix Marketplace. After download, binding `.gleam` files are generated automatically and are ready to use straight away.
 
-### 사전 준비
+### Preparation
 
-`.env` 파일에 Mendix Personal Access Token을 설정한다:
+Set your Mendix Personal Access Token in a `.env` file:
 
 ```
 MENDIX_PAT=your_personal_access_token
 ```
 
-> PAT는 [Mendix Developer Settings](https://user-settings.mendix.com/link/developersettings)에서 **Personal Access Tokens** 섹션의 **New Token**을 클릭하여 발급. 필요한 scope: `mx:marketplace-content:read`
+> Generate a PAT from [Mendix Developer Settings](https://user-settings.mendix.com/link/developersettings) — click **New Token** under **Personal Access Tokens**. Required scope: `mx:marketplace-content:read`
 
-### 실행
+### Run
 
 ```bash
 gleam run -m glendix/marketplace
 ```
 
-인터랙티브 TUI에서 위젯을 검색/선택하면 `widgets/` 디렉토리에 `.mpk`가 다운로드되고, `src/widgets/`에 바인딩 `.gleam` 파일이 자동 생성된다.
+Search and select widgets in the interactive TUI. The `.mpk` is downloaded to the `widgets/` directory, and binding `.gleam` files are auto-generated in `src/widgets/`.
 
-## .mpk 위젯 컴포넌트 사용
+## Using .mpk Widget Components
 
-`widgets/` 디렉토리에 `.mpk` 파일(Mendix 위젯 빌드 결과물)을 배치하면, 다른 위젯 안에서 기존 Mendix 위젯을 React 컴포넌트로 렌더링할 수 있다.
+Place `.mpk` files (Mendix widget build artefacts) in the `widgets/` directory to render existing Mendix widgets as React components within your own widget.
 
-### 1단계: `.mpk` 파일 배치
+### Step 1: Place the `.mpk` files
 
 ```
-프로젝트 루트/
+project root/
 ├── widgets/
 │   ├── Switch.mpk
 │   └── Badge.mpk
@@ -213,26 +215,26 @@ gleam run -m glendix/marketplace
 └── gleam.toml
 ```
 
-### 2단계: 바인딩 생성
+### Step 2: Generate bindings
 
 ```bash
 gleam run -m glendix/install
 ```
 
-실행 시 다음이 자동 처리된다:
-- `.mpk`에서 `.mjs`/`.css`를 추출하고 `widget_ffi.mjs`가 생성된다
-- `.mpk` XML의 `<property>` 정의를 파싱하여 `src/widgets/`에 바인딩 `.gleam` 파일이 자동 생성된다 (이미 존재하면 건너뜀)
+This automatically:
+- Extracts `.mjs`/`.css` from the `.mpk` and generates `widget_ffi.mjs`
+- Parses `<property>` definitions from the `.mpk` XML and generates binding `.gleam` files in `src/widgets/` (existing files are skipped)
 
-### 3단계: 자동 생성된 `src/widgets/*.gleam` 파일 확인
+### Step 3: Review the auto-generated `src/widgets/*.gleam` files
 
 ```gleam
-// src/widgets/switch.gleam (자동 생성)
+// src/widgets/switch.gleam (auto-generated)
 import glendix/mendix
 import glendix/react.{type JsProps, type ReactElement}
 import glendix/react/attribute
 import glendix/widget
 
-/// Switch 위젯 렌더링 - props에서 속성을 읽어 위젯에 전달
+/// Render the Switch widget — reads properties from props and passes them to the widget
 pub fn render(props: JsProps) -> ReactElement {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
@@ -249,33 +251,33 @@ pub fn render(props: JsProps) -> ReactElement {
 }
 ```
 
-required/optional 속성이 자동 구분되며, 필요에 따라 생성된 파일을 자유롭게 수정할 수 있다.
+Required and optional properties are distinguished automatically. You are free to modify the generated files as needed.
 
-### 4단계: 위젯에서 사용
+### Step 4: Use in your widget
 
 ```gleam
 import widgets/switch
 
-// 컴포넌트 내부에서
+// Inside a component
 switch.render(props)
 ```
 
-위젯 이름은 `.mpk` 내부 XML의 `<name>` 값을, property key는 `.mpk` XML의 원본 key를 그대로 사용한다.
+The widget name comes from the `<name>` value in the `.mpk`'s internal XML, and property keys use the original keys from the `.mpk` XML.
 
-## 기술 스택
+## Tech Stack
 
-- **Gleam** — 위젯 로직, UI (JavaScript 타겟 컴파일)
-- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API Gleam 바인딩 (Hex 패키지)
-- **React 19** — Mendix Pluggable Widget 런타임
-- **Rollup** — `@mendix/pluggable-widgets-tools` 기반 번들링
+- **Gleam** — Widget logic and UI (compiled to JavaScript target)
+- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API Gleam bindings (Hex package)
+- **React 19** — Mendix Pluggable Widget runtime
+- **Rollup** — Bundling via `@mendix/pluggable-widgets-tools`
 
-## 제약사항
+## Limitations
 
-- Gleam → JS → Mendix Widget 파이프라인은 공식 지원되지 않는 조합이므로 빌드 설정 커스터마이징이 필요할 수 있다
-- JSX 파일을 사용하지 않는다 — 모든 React 로직은 Gleam + glendix로 구현
-- Redraw 등 외부 Gleam React 라이브러리는 사용하지 않는다
-- 위젯 프로젝트에 FFI 파일을 직접 작성하지 않는다 — React/Mendix FFI는 glendix가 제공
+- The Gleam to JS to Mendix Widget pipeline is not an officially supported combination; build configuration customisation may be required
+- JSX files are not used — all React logic is implemented via Gleam + glendix
+- External Gleam React libraries such as Redraw are not used
+- FFI files are not written directly in the widget project — React/Mendix FFI is provided by glendix
 
-## 라이선스
+## Licence
 
-Apache License 2.0 — [LICENSE](./LICENSE) 참조
+Apache License 2.0 — see [LICENSE](./LICENSE)

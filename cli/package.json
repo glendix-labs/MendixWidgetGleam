@@ -1,6 +1,6 @@
 {
   "name": "create-mendix-widget-gleam",
-  "version": "2.0.12",
+  "version": "2.0.13",
   "description": "Scaffold a Mendix Pluggable Widget powered by Gleam",
   "type": "module",
   "license": "Apache-2.0",
