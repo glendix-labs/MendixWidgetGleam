@@ -8,4 +8,4 @@ runtime = "node"
 
 [dependencies]
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
-glendix = ">= 2.0.16 and < 3.0.0"
+glendix = ">= 2.0.17 and < 3.0.0"

@@ -27,7 +27,7 @@ src/
 widgets/                                # .mpk widget files (used via glendix/widget)
 bindings.json                           # External React component binding configuration
 package.json                            # npm dependencies (React, external libraries, etc.)
-gleam.toml                            # Includes glendix >= 2.0.16 dependency
+gleam.toml                            # Includes glendix >= 2.0.17 dependency
 ```
 
 React/Mendix FFI and JS Interop bindings are not included in this project — they are provided by the [glendix](https://hexdocs.pm/glendix/) Hex package.
