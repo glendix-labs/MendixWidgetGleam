@@ -11,7 +11,7 @@ Write React components entirely in Gleam and run them as Mendix Studio Pro widge
 - **Static type safety** — Gleam's robust type system catches runtime errors at compile time
 - **Immutable data** — Predictable state management
 - **JavaScript target support** — `gleam build --target javascript` outputs ES modules
-- **glendix package** — Type-safe Gleam bindings for React + Mendix API, supporting `EditableValue`, `ActionValue`, `ListValue` and all other Mendix Pluggable Widget API types
+- **glendix package** — Type-safe Gleam bindings for React + Mendix API + JS Interop, supporting `EditableValue`, `ActionValue`, `ListValue` and all other Mendix Pluggable Widget API types
 
 ## Architecture
 
@@ -27,10 +27,10 @@ src/
 widgets/                                # .mpk widget files (used via glendix/widget)
 bindings.json                           # External React component binding configuration
 package.json                            # npm dependencies (React, external libraries, etc.)
-gleam.toml                            # Includes glendix >= 2.0.13 dependency
+gleam.toml                            # Includes glendix >= 2.0.14 dependency
 ```
 
-React/Mendix FFI bindings are not included in this project — they are provided by the [glendix](https://hexdocs.pm/glendix/) Hex package.
+React/Mendix FFI and JS Interop bindings are not included in this project — they are provided by the [glendix](https://hexdocs.pm/glendix/) Hex package.
 
 ### Build Pipeline
 
@@ -267,7 +267,7 @@ The widget name comes from the `<name>` value in the `.mpk`'s internal XML, and 
 ## Tech Stack
 
 - **Gleam** — Widget logic and UI (compiled to JavaScript target)
-- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API Gleam bindings (Hex package)
+- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API + JS Interop Gleam bindings (Hex package)
 - **React 19** — Mendix Pluggable Widget runtime
 - **Rollup** — Bundling via `@mendix/pluggable-widgets-tools`
 

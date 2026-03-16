@@ -30,11 +30,11 @@ my-widget/
   widgets/                       # .mpk 위젯 파일 (glendix/widget로 바인딩)
   bindings.json                  # 외부 React 컴포넌트 바인딩 설정
   package.json                   # npm 의존성 (React, 외부 라이브러리 등)
-  gleam.toml                   # Gleam 프로젝트 설정 (glendix >= 2.0.13 의존성 포함)
+  gleam.toml                   # Gleam 프로젝트 설정 (glendix >= 2.0.14 의존성 포함)
   CLAUDE.md                    # AI 어시스턴트용 프로젝트 컨텍스트
 ```
 
-React/Mendix FFI 바인딩은 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공된다.
+React/Mendix FFI 및 JS Interop 바인딩은 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공된다.
 
 ## 생성 후 시작하기
 
@@ -52,6 +52,7 @@ gleam run -m glendix/marketplace  # Marketplace 위젯 검색/다운로드
 
 - **React** — `react`, `react/attribute`, `react/hook`, `react/event`, `react/html`, `react/svg`, `react/svg_attribute`, `binding`, `widget`
 - **Mendix** — `mendix`, `mendix/editable_value`, `mendix/action`, `mendix/list_value`, `mendix/selection`, `mendix/reference`, `mendix/reference_set`, `mendix/date`, `mendix/big`, `mendix/filter` 등
+- **JS Interop** — `js/array`, `js/object`, `js/json`, `js/promise`, `js/dom`, `js/timer`
 
 ## 라이선스
 

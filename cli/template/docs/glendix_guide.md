@@ -2179,7 +2179,210 @@ camera_widget.render(props)
 
 ---
 
-## 6. 트러블슈팅
+## 6. JS Interop — 외부 JS 라이브러리 연동
+
+`glendix/js/` 모듈은 외부 JavaScript 라이브러리(SpreadJS, Chart.js 등)와 직접 상호작용할 때 사용하는 저수준 interop API를 제공합니다. React 컴포넌트 바인딩(`glendix/binding`)으로 해결되지 않는 경우의 escape hatch입니다.
+
+> 모든 JS 값은 `Dynamic` 타입으로 표현됩니다. 타입 안전성보다 유연성을 우선하는 설계이므로, 가능하면 `glendix/binding`이나 전용 opaque 래퍼를 먼저 고려하세요.
+
+### 6.1 배열 변환 — `js/array`
+
+Gleam List ↔ JS Array 변환 유틸리티입니다.
+
+```gleam
+import gleam/dynamic.{type Dynamic}
+import glendix/js/array
+
+// Gleam List → JS Array (Dynamic)
+let js_arr = array.from_list([1, 2, 3])
+
+// JS Array → Gleam List
+let gleam_list: List(Int) = array.to_list(js_arr)
+```
+
+### 6.2 객체 조작 — `js/object`
+
+JS 객체 생성, 속성 접근, 메서드 호출을 제공합니다.
+
+```gleam
+import gleam/dynamic
+import glendix/js/object
+
+// 객체 생성
+let config = object.object([
+  #("width", dynamic.from(800)),
+  #("height", dynamic.from(600)),
+  #("editable", dynamic.from(True)),
+])
+
+// 빈 객체
+let obj = object.empty()
+
+// 속성 읽기/쓰기 (set은 mutation — 원본 반환)
+let width = object.get(config, "width")
+let config = object.set(config, "theme", dynamic.from("dark"))
+
+// 속성 삭제/존재 확인
+let config = object.delete(config, "editable")
+let has_theme = object.has(config, "theme")  // True
+
+// 메서드 호출
+let result = object.call_method(spreadsheet, "getCell", [
+  dynamic.from(0),
+  dynamic.from(0),
+])
+let value = object.call_method_0(cell, "getValue")
+
+// new 연산자로 인스턴스 생성
+let instance = object.new_instance(constructor, [
+  dynamic.from("arg1"),
+])
+```
+
+### 6.3 JSON — `js/json`
+
+JSON 직렬화/역직렬화입니다.
+
+```gleam
+import gleam/dynamic
+import glendix/js/json
+
+// 직렬화
+let json_str = json.stringify(dynamic.from(config))
+
+// 역직렬화 (Result 반환)
+case json.parse("{\"key\": \"value\"}") {
+  Ok(data) -> object.get(data, "key")
+  Error(msg) -> // 파싱 에러 메시지
+}
+```
+
+### 6.4 Promise — `js/promise`
+
+Promise 체이닝, 에러 처리, 병렬 실행을 제공합니다. `glendix/react`의 `Promise(a)` 타입을 사용합니다.
+
+```gleam
+import gleam/dynamic.{type Dynamic}
+import glendix/js/promise
+import glendix/react.{type Promise}
+
+// 즉시 이행/거부
+let p = promise.resolve(42)
+let err = promise.reject("something went wrong")
+
+// 체이닝 (flatMap)
+promise.then_(fetch_data(), fn(data) {
+  promise.resolve(transform(data))
+})
+
+// 값 변환 (map)
+promise.map(fetch_data(), fn(data) {
+  object.get(data, "name")
+})
+
+// 에러 처리
+promise.catch_(risky_operation(), fn(error: Dynamic) {
+  promise.resolve(fallback_value)
+})
+
+// 병렬 실행 (모든 Promise 대기)
+promise.all([fetch_users(), fetch_roles()])
+|> promise.map(fn(results) {
+  // results: List(a)
+})
+
+// 가장 빠른 결과
+promise.race([fetch_from_primary(), fetch_from_backup()])
+
+// fire-and-forget 콜백
+promise.await_(save_data(), fn(result) {
+  // 이행 시 실행, 반환값 무시
+  Nil
+})
+```
+
+### 6.5 DOM 조작 — `js/dom`
+
+DOM 요소에 대한 직접 조작 유틸리티입니다. `hook.use_ref`로 얻은 ref의 current 값과 함께 사용합니다.
+
+```gleam
+import glendix/js/dom
+import glendix/react/hook
+
+let input_ref = hook.use_ref(Nil)
+
+// 포커스/블러/클릭
+dom.focus(hook.get_ref(input_ref))
+dom.blur(hook.get_ref(input_ref))
+dom.click(hook.get_ref(input_ref))
+
+// 스크롤
+dom.scroll_into_view(hook.get_ref(input_ref))
+
+// 위치/크기 정보 (DOMRect)
+let rect = dom.get_bounding_client_rect(hook.get_ref(input_ref))
+
+// CSS 선택자로 하위 요소 검색
+case dom.query_selector(hook.get_ref(container_ref), ".target") {
+  Some(el) -> dom.focus(el)
+  None -> Nil
+}
+```
+
+### 6.6 타이머 — `js/timer`
+
+setTimeout/setInterval 래퍼입니다. `TimerId`는 opaque type으로 숫자 조작을 방지합니다.
+
+```gleam
+import glendix/js/timer
+
+// 지연 실행
+let id = timer.set_timeout(fn() {
+  // 1초 후 실행
+  Nil
+}, 1000)
+
+// 취소
+timer.clear_timeout(id)
+
+// 반복 실행
+let interval_id = timer.set_interval(fn() {
+  // 500ms마다 실행
+  Nil
+}, 500)
+
+// 반복 취소
+timer.clear_interval(interval_id)
+```
+
+#### useEffect와 함께 사용 (클린업 패턴)
+
+```gleam
+hook.use_effect_once_cleanup(fn() {
+  let id = timer.set_interval(fn() {
+    update_count(fn(prev) { prev + 1 })
+    Nil
+  }, 1000)
+
+  // 언마운트 시 타이머 정리
+  fn() { timer.clear_interval(id) }
+})
+```
+
+### 6.7 모듈 요약
+
+| 모듈 | 용도 | FFI |
+|------|------|-----|
+| `js/array` | Gleam List ↔ JS Array 변환 | 없음 (react_ffi.mjs 재사용) |
+| `js/object` | 객체 생성/속성 CRUD/메서드 호출 | object_ffi.mjs |
+| `js/json` | JSON stringify/parse | json_ffi.mjs |
+| `js/promise` | Promise 체이닝/병렬/에러 처리 | promise_ffi.mjs |
+| `js/dom` | DOM 포커스/클릭/스크롤/쿼리 | dom_ffi.mjs |
+| `js/timer` | setTimeout/setInterval | timer_ffi.mjs |
+
+---
+
+## 7. 트러블슈팅
 
 ### 빌드 에러
 
