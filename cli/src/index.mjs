@@ -6,6 +6,7 @@ import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mkdir, writeFile } from "node:fs/promises";
 import { execSync } from "node:child_process";
+import { collect_options } from "../tui/build/dev/javascript/tui/tui.mjs";
 import { collectOptions } from "./prompts.mjs";
 import { generateNames } from "./naming.mjs";
 import { getPmConfig } from "./pm.mjs";
@@ -53,16 +54,30 @@ export async function main(args) {
     return;
   }
 
-  console.log(
-    `\n${BOLD}${CYAN}create-mendix-widget-gleam${RESET} ${DIM}v${VERSION}${RESET}\n`,
-  );
-
   // Extract project name from CLI args (excluding flags)
   const positional = args.filter((a) => !a.startsWith("-"));
-  const cliProjectName = positional[0] || null;
+  const cliProjectName = positional[0] || "";
 
-  // Collect options via prompts
-  const { projectName, pm, lang } = await collectOptions(cliProjectName);
+  // Collect options — etch TUI (TTY) with readline fallback (non-TTY/pipe)
+  const header = `\n${BOLD}${CYAN}create-mendix-widget-gleam${RESET} ${DIM}v${VERSION}${RESET}\n`;
+  let projectName, pm, lang;
+  let usedFallback = false;
+  try {
+    const options = await collect_options(cliProjectName);
+    projectName = options.project_name;
+    pm = options.pm;
+    lang = options.lang;
+  } catch {
+    // Fallback: readline prompts (non-TTY, CI, pipe, etc.)
+    usedFallback = true;
+    console.log(header);
+    const result = await collectOptions(cliProjectName || null);
+    projectName = result.projectName;
+    pm = result.pm;
+    lang = result.lang;
+  }
+
+  if (!usedFallback) console.log(header);
 
   // Name transformations
   const names = generateNames(projectName);

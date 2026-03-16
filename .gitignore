@@ -21,7 +21,12 @@ bun.lock
 manifest.toml
 
 # Gleam 컴파일 출력
-build/
+/build/
+
+# CLI TUI 빌드 캐시/Erlang 전용 파일 제외
+cli/tui/build/dev/javascript/**/_gleam_artefacts/
+cli/tui/build/dev/javascript/**/*.erl
+cli/tui/build/packages/
 
 # Mendix 위젯 빌드 출력
 dist/

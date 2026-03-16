@@ -1,6 +1,6 @@
 {
   "name": "create-mendix-widget-gleam",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "Scaffold a Mendix Pluggable Widget powered by Gleam",
   "type": "module",
   "license": "Apache-2.0",
@@ -9,8 +9,12 @@
     "bin/",
     "src/",
     "template/",
+    "tui/build/dev/javascript/",
     "README.md"
   ],
+  "scripts": {
+    "build:tui": "cd tui && gleam build --target javascript"
+  },
   "engines": {
     "node": ">=18"
   },
