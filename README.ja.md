@@ -27,7 +27,7 @@ src/
 widgets/                                # .mpkウィジェットファイル（glendix/widgetで利用）
 bindings.json                           # 外部Reactコンポーネントバインディング設定
 package.json                            # npm依存関係（React、外部ライブラリなど）
-gleam.toml                            # glendix >= 2.0.18依存関係を含む
+gleam.toml                            # glendix >= 2.0.19依存関係を含む
 ```
 
 React/Mendix FFIおよびJS Interopバインディングはこのプロジェクトには含まれず、[glendix](https://hexdocs.pm/glendix/) Hexパッケージとして提供される。
