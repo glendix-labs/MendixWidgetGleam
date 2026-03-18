@@ -32,18 +32,19 @@ gleam run -m glendix/install
 
 ```gleam
 // src/widgets/switch.gleam (자동 생성)
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
+import glendix/mendix.{type JsProps}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute
 import glendix/widget
 
 /// Switch 위젯 렌더링 - props에서 속성을 읽어 위젯에 전달
-pub fn render(props: JsProps) -> ReactElement {
+pub fn render(props: JsProps) -> Element {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
 
   let comp = widget.component("Switch")
-  react.component_el(
+  interop.component_el(
     comp,
     [
       attribute.attribute("booleanAttribute", boolean_attribute),

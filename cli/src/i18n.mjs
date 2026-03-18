@@ -251,7 +251,7 @@ const templateComments = {
     // __widget_name__.gleam
     widget_main_1: '// Mendix Pluggable Widget - "Hello World"',
     widget_main_2:
-      "// React functional component: fn(JsProps) -> ReactElement",
+      "// React functional component: fn(JsProps) -> Element",
     widget_main_doc:
       "/// Main widget function - called by Mendix runtime as a React component",
 
@@ -297,7 +297,7 @@ const templateComments = {
     // __widget_name__.gleam
     widget_main_1: '// Mendix Pluggable Widget - "Hello World"',
     widget_main_2:
-      "// React 함수형 컴포넌트: fn(JsProps) -> ReactElement",
+      "// React 함수형 컴포넌트: fn(JsProps) -> Element",
     widget_main_doc:
       "/// 위젯 메인 함수 - Mendix 런타임이 React 컴포넌트로 호출",
 
@@ -342,7 +342,7 @@ const templateComments = {
     // __widget_name__.gleam
     widget_main_1: '// Mendix Pluggable Widget - "Hello World"',
     widget_main_2:
-      "// React関数コンポーネント: fn(JsProps) -> ReactElement",
+      "// React関数コンポーネント: fn(JsProps) -> Element",
     widget_main_doc:
       "/// ウィジェットメイン関数 - MendixランタイムがReactコンポーネントとして呼び出し",
 

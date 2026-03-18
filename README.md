@@ -27,7 +27,7 @@ src/
 widgets/                                # .mpk widget files (used via glendix/widget)
 bindings.json                           # External React component binding configuration
 package.json                            # npm dependencies (React, external libraries, etc.)
-gleam.toml                            # Includes glendix >= 2.0.20 dependency
+gleam.toml                            # Includes glendix >= 3.0.0 dependency
 ```
 
 React/Mendix FFI and JS Interop bindings are not included in this project — they are provided by the [glendix](https://hexdocs.pm/glendix/) Hex package.
@@ -45,19 +45,19 @@ ES modules (.mjs) — build/dev/javascript/...
 
 ### Core Principles
 
-The Gleam function `fn(JsProps) -> ReactElement` has an identical signature to a React functional component. glendix provides type-safe access to React primitives and Mendix runtime type accessors, so widget projects need only focus on business logic.
+The Gleam function `fn(JsProps) -> Element` has an identical signature to a React functional component. React bindings are provided by [redraw](https://hexdocs.pm/redraw/) / [redraw_dom](https://hexdocs.pm/redraw_dom/), while glendix provides Mendix runtime type accessors and JS interop, so widget projects need only focus on business logic.
 
 ```gleam
 // src/mendix_widget_gleam.gleam
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
-import glendix/react/html
+import glendix/mendix.{type JsProps}
+import redraw.{type Element}
+import redraw/dom/attribute
+import redraw/dom/html
 
-pub fn widget(props: JsProps) -> ReactElement {
+pub fn widget(props: JsProps) -> Element {
   let sample_text = mendix.get_string_prop(props, "sampleText")
   html.div([attribute.class("widget-hello-world")], [
-    react.text("Hello " <> sample_text),
+    html.text("Hello " <> sample_text),
   ])
 }
 ```
@@ -69,7 +69,7 @@ import glendix/mendix
 import glendix/mendix/editable_value
 import glendix/mendix/action
 
-pub fn widget(props: JsProps) -> ReactElement {
+pub fn widget(props: JsProps) -> Element {
   // Access EditableValue
   let name_attr: EditableValue = mendix.get_prop_required(props, "name")
   let display = editable_value.display_value(name_attr)
@@ -163,17 +163,18 @@ A `binding_ffi.mjs` file is generated automatically. It is also regenerated on s
 
 ```gleam
 import glendix/binding
-import glendix/react.{type ReactElement}
-import glendix/react/attribute.{type Attribute}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute.{type Attribute}
 
 fn m() { binding.module("recharts") }
 
-pub fn pie_chart(attrs: List(Attribute), children: List(ReactElement)) -> ReactElement {
-  react.component_el(binding.resolve(m(), "PieChart"), attrs, children)
+pub fn pie_chart(attrs: List(Attribute), children: List(Element)) -> Element {
+  interop.component_el(binding.resolve(m(), "PieChart"), attrs, children)
 }
 
-pub fn tooltip(attrs: List(Attribute)) -> ReactElement {
-  react.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
+pub fn tooltip(attrs: List(Attribute)) -> Element {
+  interop.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
 }
 ```
 
@@ -230,18 +231,19 @@ This automatically:
 
 ```gleam
 // src/widgets/switch.gleam (auto-generated)
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
+import glendix/mendix.{type JsProps}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute
 import glendix/widget
 
 /// Render the Switch widget — reads properties from props and passes them to the widget
-pub fn render(props: JsProps) -> ReactElement {
+pub fn render(props: JsProps) -> Element {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
 
   let comp = widget.component("Switch")
-  react.component_el(
+  interop.component_el(
     comp,
     [
       attribute.attribute("booleanAttribute", boolean_attribute),
@@ -276,7 +278,7 @@ The widget name comes from the `<name>` value in the `.mpk`'s internal XML, and 
 
 - The Gleam to JS to Mendix Widget pipeline is not an officially supported combination; build configuration customisation may be required
 - JSX files are not used — all React logic is implemented via Gleam + glendix
-- External Gleam React libraries such as Redraw are not used
+- React bindings use redraw/redraw_dom via glendix — other Gleam React libraries are not used
 - FFI files are not written directly in the widget project — React/Mendix FFI is provided by glendix
 
 ## Licence

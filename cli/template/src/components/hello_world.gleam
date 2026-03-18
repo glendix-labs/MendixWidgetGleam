@@ -1,13 +1,13 @@
 {{I18N:hello_world_1}}
 {{I18N:hello_world_2}}
 
-import glendix/react.{type ReactElement}
-import glendix/react/attribute
-import glendix/react/html
+import redraw.{type Element}
+import redraw/dom/attribute
+import redraw/dom/html
 
 {{I18N:hello_world_doc}}
-pub fn render(sample_text: String) -> ReactElement {
+pub fn render(sample_text: String) -> Element {
   html.div([attribute.class("widget-hello-world")], [
-    react.text("Hello " <> sample_text),
+    html.text("Hello " <> sample_text),
   ])
 }

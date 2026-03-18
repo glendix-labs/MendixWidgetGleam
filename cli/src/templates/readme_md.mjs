@@ -33,19 +33,19 @@ A Mendix Pluggable Widget written in Gleam.
 
 ## Core Principles
 
-The Gleam function \`fn(JsProps) -> ReactElement\` has the same signature as a React functional component. glendix provides type-safe access to React primitives and Mendix runtime type accessors, so widget projects only need to focus on business logic.
+The Gleam function \`fn(JsProps) -> Element\` has the same signature as a React functional component. React bindings come from the \`redraw\`/\`redraw_dom\` packages, while glendix handles Mendix API access and JS interop, so widget projects only need to focus on business logic.
 
 \`\`\`gleam
 // src/${names.snakeCase}.gleam
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
-import glendix/react/html
+import glendix/mendix.{type JsProps}
+import redraw.{type Element}
+import redraw/dom/attribute
+import redraw/dom/html
 
-pub fn widget(props: JsProps) -> ReactElement {
+pub fn widget(props: JsProps) -> Element {
   let sample_text = mendix.get_string_prop(props, "sampleText")
   html.div([attribute.class("widget-hello-world")], [
-    react.text("Hello " <> sample_text),
+    html.text("Hello " <> sample_text),
   ])
 }
 \`\`\`
@@ -53,11 +53,12 @@ pub fn widget(props: JsProps) -> ReactElement {
 Mendix complex types can also be used type-safely from Gleam:
 
 \`\`\`gleam
-import glendix/mendix
+import glendix/mendix.{type JsProps}
 import glendix/mendix/editable_value
 import glendix/mendix/action
+import redraw.{type Element}
 
-pub fn widget(props: JsProps) -> ReactElement {
+pub fn widget(props: JsProps) -> Element {
   // Access EditableValue
   let name_attr: EditableValue = mendix.get_prop_required(props, "name")
   let display = editable_value.display_value(name_attr)
@@ -126,7 +127,7 @@ bindings.json                      # External React component binding configurat
 package.json                       # npm dependencies (React, external libraries, etc.)
 \`\`\`
 
-React/Mendix FFI and JS Interop bindings are provided by the [glendix](https://hexdocs.pm/glendix/) Hex package.
+React bindings come from [redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/), while Mendix API and JS Interop bindings are provided by [glendix](https://hexdocs.pm/glendix/).
 
 ## Using External React Components
 
@@ -162,17 +163,18 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 import glendix/binding
-import glendix/react.{type ReactElement}
-import glendix/react/attribute.{type Attribute}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute.{type Attribute}
 
 fn m() { binding.module("recharts") }
 
-pub fn pie_chart(attrs: List(Attribute), children: List(ReactElement)) -> ReactElement {
-  react.component_el(binding.resolve(m(), "PieChart"), attrs, children)
+pub fn pie_chart(attrs: List(Attribute), children: List(Element)) -> Element {
+  interop.component_el(binding.resolve(m(), "PieChart"), attrs, children)
 }
 
-pub fn tooltip(attrs: List(Attribute)) -> ReactElement {
-  react.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
+pub fn tooltip(attrs: List(Attribute)) -> Element {
+  interop.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
 }
 \`\`\`
 
@@ -229,18 +231,19 @@ This automatically:
 
 \`\`\`gleam
 // src/widgets/switch.gleam (auto-generated)
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
+import glendix/mendix.{type JsProps}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute
 import glendix/widget
 
 /// Render Switch widget - reads properties from props and passes them to the widget
-pub fn render(props: JsProps) -> ReactElement {
+pub fn render(props: JsProps) -> Element {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
 
   let comp = widget.component("Switch")
-  react.component_el(
+  interop.component_el(
     comp,
     [
       attribute.attribute("booleanAttribute", boolean_attribute),
@@ -267,7 +270,8 @@ Widget names use the \`<name>\` value from the \`.mpk\`'s internal XML, and prop
 ## Tech Stack
 
 - **Gleam** → JavaScript compilation
-- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API + JS Interop Gleam bindings
+- **[glendix](https://hexdocs.pm/glendix/)** — Mendix API + JS Interop Gleam bindings
+- **[redraw](https://hexdocs.pm/redraw/)** / **[redraw_dom](https://hexdocs.pm/redraw_dom/)** — React Gleam bindings
 - **Mendix Pluggable Widget** (React 19)
 - **${pm}** — Package manager
 
@@ -288,19 +292,19 @@ Gleam 언어로 작성된 Mendix Pluggable Widget.
 
 ## 핵심 원리
 
-Gleam 함수 \`fn(JsProps) -> ReactElement\`는 React 함수형 컴포넌트와 동일한 시그니처다. glendix가 React 원시 함수와 Mendix 런타임 타입 접근자를 타입 안전하게 제공하므로, 위젯 프로젝트에서는 비즈니스 로직에만 집중하면 된다.
+Gleam 함수 \`fn(JsProps) -> Element\`는 React 함수형 컴포넌트와 동일한 시그니처다. React 바인딩은 \`redraw\`/\`redraw_dom\` 패키지가, Mendix API 접근과 JS interop은 glendix가 제공하므로, 위젯 프로젝트에서는 비즈니스 로직에만 집중하면 된다.
 
 \`\`\`gleam
 // src/${names.snakeCase}.gleam
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
-import glendix/react/html
+import glendix/mendix.{type JsProps}
+import redraw.{type Element}
+import redraw/dom/attribute
+import redraw/dom/html
 
-pub fn widget(props: JsProps) -> ReactElement {
+pub fn widget(props: JsProps) -> Element {
   let sample_text = mendix.get_string_prop(props, "sampleText")
   html.div([attribute.class("widget-hello-world")], [
-    react.text("Hello " <> sample_text),
+    html.text("Hello " <> sample_text),
   ])
 }
 \`\`\`
@@ -308,11 +312,12 @@ pub fn widget(props: JsProps) -> ReactElement {
 Mendix 복합 타입도 Gleam에서 타입 안전하게 사용할 수 있다:
 
 \`\`\`gleam
-import glendix/mendix
+import glendix/mendix.{type JsProps}
 import glendix/mendix/editable_value
 import glendix/mendix/action
+import redraw.{type Element}
 
-pub fn widget(props: JsProps) -> ReactElement {
+pub fn widget(props: JsProps) -> Element {
   // EditableValue 접근
   let name_attr: EditableValue = mendix.get_prop_required(props, "name")
   let display = editable_value.display_value(name_attr)
@@ -381,7 +386,7 @@ bindings.json                      # 외부 React 컴포넌트 바인딩 설정
 package.json                       # npm 의존성 (React, 외부 라이브러리 등)
 \`\`\`
 
-React/Mendix FFI 및 JS Interop 바인딩은 [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공됩니다.
+React 바인딩은 [redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/)이, Mendix API 및 JS Interop 바인딩은 [glendix](https://hexdocs.pm/glendix/)가 제공합니다.
 
 ## 외부 React 컴포넌트 사용
 
@@ -417,17 +422,18 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 import glendix/binding
-import glendix/react.{type ReactElement}
-import glendix/react/attribute.{type Attribute}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute.{type Attribute}
 
 fn m() { binding.module("recharts") }
 
-pub fn pie_chart(attrs: List(Attribute), children: List(ReactElement)) -> ReactElement {
-  react.component_el(binding.resolve(m(), "PieChart"), attrs, children)
+pub fn pie_chart(attrs: List(Attribute), children: List(Element)) -> Element {
+  interop.component_el(binding.resolve(m(), "PieChart"), attrs, children)
 }
 
-pub fn tooltip(attrs: List(Attribute)) -> ReactElement {
-  react.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
+pub fn tooltip(attrs: List(Attribute)) -> Element {
+  interop.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
 }
 \`\`\`
 
@@ -484,18 +490,19 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 // src/widgets/switch.gleam (자동 생성)
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
+import glendix/mendix.{type JsProps}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute
 import glendix/widget
 
 /// Switch 위젯 렌더링 - props에서 속성을 읽어 위젯에 전달
-pub fn render(props: JsProps) -> ReactElement {
+pub fn render(props: JsProps) -> Element {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
 
   let comp = widget.component("Switch")
-  react.component_el(
+  interop.component_el(
     comp,
     [
       attribute.attribute("booleanAttribute", boolean_attribute),
@@ -522,7 +529,8 @@ switch.render(props)
 ## 기술 스택
 
 - **Gleam** → JavaScript 컴파일
-- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API + JS Interop Gleam 바인딩
+- **[glendix](https://hexdocs.pm/glendix/)** — Mendix API + JS Interop Gleam 바인딩
+- **[redraw](https://hexdocs.pm/redraw/)** / **[redraw_dom](https://hexdocs.pm/redraw_dom/)** — React Gleam 바인딩
 - **Mendix Pluggable Widget** (React 19)
 - **${pm}** — 패키지 매니저
 
@@ -543,19 +551,19 @@ Gleam言語で作成されたMendix Pluggable Widget。
 
 ## 基本原理
 
-Gleam関数 \`fn(JsProps) -> ReactElement\` はReact関数コンポーネントと同一のシグネチャを持つ。glendixがReactプリミティブ関数とMendixランタイム型アクセサを型安全に提供するため、ウィジェットプロジェクトではビジネスロジックにのみ集中すればよい。
+Gleam関数 \`fn(JsProps) -> Element\` はReact関数コンポーネントと同一のシグネチャを持つ。Reactバインディングは\`redraw\`/\`redraw_dom\`パッケージが、Mendix APIアクセスとJS interopはglendixが提供するため、ウィジェットプロジェクトではビジネスロジックにのみ集中すればよい。
 
 \`\`\`gleam
 // src/${names.snakeCase}.gleam
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
-import glendix/react/html
+import glendix/mendix.{type JsProps}
+import redraw.{type Element}
+import redraw/dom/attribute
+import redraw/dom/html
 
-pub fn widget(props: JsProps) -> ReactElement {
+pub fn widget(props: JsProps) -> Element {
   let sample_text = mendix.get_string_prop(props, "sampleText")
   html.div([attribute.class("widget-hello-world")], [
-    react.text("Hello " <> sample_text),
+    html.text("Hello " <> sample_text),
   ])
 }
 \`\`\`
@@ -563,11 +571,12 @@ pub fn widget(props: JsProps) -> ReactElement {
 Mendixの複合型もGleamから型安全に使用できる：
 
 \`\`\`gleam
-import glendix/mendix
+import glendix/mendix.{type JsProps}
 import glendix/mendix/editable_value
 import glendix/mendix/action
+import redraw.{type Element}
 
-pub fn widget(props: JsProps) -> ReactElement {
+pub fn widget(props: JsProps) -> Element {
   // EditableValueへのアクセス
   let name_attr: EditableValue = mendix.get_prop_required(props, "name")
   let display = editable_value.display_value(name_attr)
@@ -636,7 +645,7 @@ bindings.json                      # 外部Reactコンポーネントバイン�
 package.json                       # npm依存関係（React、外部ライブラリなど）
 \`\`\`
 
-React/Mendix FFIおよびJS Interopバインディングは[glendix](https://hexdocs.pm/glendix/) Hexパッケージとして提供される。
+Reactバインディングは[redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/)が、Mendix APIおよびJS Interopバインディングは[glendix](https://hexdocs.pm/glendix/)が提供する。
 
 ## 外部Reactコンポーネントの使用
 
@@ -672,17 +681,18 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 import glendix/binding
-import glendix/react.{type ReactElement}
-import glendix/react/attribute.{type Attribute}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute.{type Attribute}
 
 fn m() { binding.module("recharts") }
 
-pub fn pie_chart(attrs: List(Attribute), children: List(ReactElement)) -> ReactElement {
-  react.component_el(binding.resolve(m(), "PieChart"), attrs, children)
+pub fn pie_chart(attrs: List(Attribute), children: List(Element)) -> Element {
+  interop.component_el(binding.resolve(m(), "PieChart"), attrs, children)
 }
 
-pub fn tooltip(attrs: List(Attribute)) -> ReactElement {
-  react.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
+pub fn tooltip(attrs: List(Attribute)) -> Element {
+  interop.void_component_el(binding.resolve(m(), "Tooltip"), attrs)
 }
 \`\`\`
 
@@ -739,18 +749,19 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 // src/widgets/switch.gleam（自動生成）
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
+import glendix/mendix.{type JsProps}
+import glendix/interop
+import redraw.{type Element}
+import redraw/dom/attribute
 import glendix/widget
 
 /// Switchウィジェットのレンダリング - propsからプロパティを読み取りウィジェットに渡す
-pub fn render(props: JsProps) -> ReactElement {
+pub fn render(props: JsProps) -> Element {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
 
   let comp = widget.component("Switch")
-  react.component_el(
+  interop.component_el(
     comp,
     [
       attribute.attribute("booleanAttribute", boolean_attribute),
@@ -777,7 +788,8 @@ switch.render(props)
 ## 技術スタック
 
 - **Gleam** → JavaScriptコンパイル
-- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API + JS Interop Gleamバインディング
+- **[glendix](https://hexdocs.pm/glendix/)** — Mendix API + JS Interop Gleamバインディング
+- **[redraw](https://hexdocs.pm/redraw/)** / **[redraw_dom](https://hexdocs.pm/redraw_dom/)** — React Gleamバインディング
 - **Mendix Pluggable Widget**（React 19）
 - **${pm}** — パッケージマネージャー
 

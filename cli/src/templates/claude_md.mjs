@@ -41,7 +41,7 @@ IMPORTANT: Breaking these rules will break the build or compromise the architect
 - **Do not write JSX/JS files directly.** All widget logic and UI must be written in Gleam
 - **Do not write FFI files (.mjs) in the widget project.** React/Mendix FFI is provided by the glendix package
 - **Do not manually manage bridge JS files (src/*.js).** glendix auto-generates/deletes them at build time
-- **Do not use external Gleam React libraries such as Redraw.** Use only glendix for React bindings
+- **React bindings use \`redraw\`/\`redraw_dom\` packages.** glendix v3.0 no longer provides React bindings directly
 - The Gleam compilation output path (\`build/dev/javascript/{gleam.toml name}/\`) must match the Rollup input path
 - Mendix widget names allow only alphabetic characters (a-zA-Z)
 
@@ -53,7 +53,7 @@ IMPORTANT: Breaking these rules will break the build or compromise the architect
 
 ## Architecture
 
-Widget entry point signature: \`pub fn widget(props: JsProps) -> ReactElement\` — identical to a React functional component.
+Widget entry point signature: \`pub fn widget(props: JsProps) -> Element\` — identical to a React functional component. \`JsProps\` from \`glendix/mendix\`, \`Element\` from \`redraw\`.
 
 - \`src/${names.snakeCase}.gleam\` — Main widget (called by Mendix runtime)
 - \`src/editor_config.gleam\` — Studio Pro property panel configuration
@@ -84,7 +84,8 @@ src/*.gleam → gleam build → build/dev/javascript/**/*.mjs → Bridge JS (aut
 - Mendix props (\`JsProps\`) are accessed via \`mendix.get_prop\`/\`mendix.get_string_prop\` etc.
 - Mendix complex types (\`EditableValue\`, \`ActionValue\`, \`ListValue\`) are opaque types with FFI accessors
 - JS \`undefined\` ↔ Gleam \`Option\` conversion is handled automatically at the FFI boundary
-- HTML attributes use the Attribute list API: \`[attribute.class("x"), event.on_click(handler)]\`
+- HTML elements use \`redraw/dom/html\`, attributes use \`redraw/dom/attribute\`, events use \`redraw/dom/events\`
+- lustre TEA pattern is supported via \`glendix/lustre\` bridge (optional)
 - Gleam tuples \`#(a, b)\` = JS \`[a, b]\` — directly compatible with \`useState\` return values
 
 ## Reference Docs

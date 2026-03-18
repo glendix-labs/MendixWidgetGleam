@@ -48,18 +48,19 @@ For example, placing \`Switch.mpk\` generates \`src/widgets/switch.gleam\`:
 
 \`\`\`gleam
 // src/widgets/switch.gleam (auto-generated)
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
+import glendix/interop
+import glendix/mendix.{type JsProps}
 import glendix/widget
+import redraw.{type Element}
+import redraw/dom/attribute
 
 /// Render Switch widget - reads properties from props and passes them to the widget
-pub fn render(props: JsProps) -> ReactElement {
+pub fn render(props: JsProps) -> Element {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
 
   let comp = widget.component("Switch")
-  react.component_el(
+  interop.component_el(
     comp,
     [
       attribute.attribute("booleanAttribute", boolean_attribute),
@@ -134,18 +135,19 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 // src/widgets/switch.gleam (자동 생성)
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
+import glendix/interop
+import glendix/mendix.{type JsProps}
 import glendix/widget
+import redraw.{type Element}
+import redraw/dom/attribute
 
 /// Switch 위젯 렌더링 - props에서 속성을 읽어 위젯에 전달
-pub fn render(props: JsProps) -> ReactElement {
+pub fn render(props: JsProps) -> Element {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
 
   let comp = widget.component("Switch")
-  react.component_el(
+  interop.component_el(
     comp,
     [
       attribute.attribute("booleanAttribute", boolean_attribute),
@@ -220,18 +222,19 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 // src/widgets/switch.gleam（自動生成）
-import glendix/mendix
-import glendix/react.{type JsProps, type ReactElement}
-import glendix/react/attribute
+import glendix/interop
+import glendix/mendix.{type JsProps}
 import glendix/widget
+import redraw.{type Element}
+import redraw/dom/attribute
 
 /// Switchウィジェットのレンダリング - propsからプロパティを読み取りウィジェットに渡す
-pub fn render(props: JsProps) -> ReactElement {
+pub fn render(props: JsProps) -> Element {
   let boolean_attribute = mendix.get_prop_required(props, "booleanAttribute")
   let action = mendix.get_prop_required(props, "action")
 
   let comp = widget.component("Switch")
-  react.component_el(
+  interop.component_el(
     comp,
     [
       attribute.attribute("booleanAttribute", boolean_attribute),

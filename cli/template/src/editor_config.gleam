@@ -1,18 +1,14 @@
 {{I18N:editor_config_1}}
 {{I18N:editor_config_2}}
 
-{{I18N:editor_config_3}}
-pub type Values
-
-pub type Properties
-
-pub type Target
+import glendix/editor_config.{type Properties}
+import glendix/mendix.{type JsProps}
 
 {{I18N:editor_config_doc}}
 pub fn get_properties(
-  _values: Values,
+  _values: JsProps,
   default_properties: Properties,
-  _target: Target,
+  _platform: String,
 ) -> Properties {
   default_properties
 }
