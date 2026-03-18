@@ -89,6 +89,38 @@ fn clear_screen() {
   ])
 }
 
+// ── 표시 폭 계산 (한국어/CJK 전각 문자 대응) ────────────────
+
+fn display_width(str: String) -> Int {
+  string.to_utf_codepoints(str)
+  |> list.fold(0, fn(acc, cp) {
+    case is_wide_char(string.utf_codepoint_to_int(cp)) {
+      True -> acc + 2
+      False -> acc + 1
+    }
+  })
+}
+
+fn is_wide_char(code: Int) -> Bool {
+  // Hangul Syllables (가-힣)
+  code >= 0xAC00 && code <= 0xD7A3
+  // Hangul Jamo
+  || code >= 0x1100 && code <= 0x11FF
+  // Hangul Compatibility Jamo
+  || code >= 0x3130 && code <= 0x318F
+  // CJK Symbols, Hiragana, Katakana, Bopomofo
+  || code >= 0x3000 && code <= 0x30FF
+  // CJK Unified Ideographs Extension A
+  || code >= 0x3400 && code <= 0x4DBF
+  // CJK Unified Ideographs
+  || code >= 0x4E00 && code <= 0x9FFF
+  // CJK Compatibility Ideographs
+  || code >= 0xF900 && code <= 0xFAFF
+  // Fullwidth Forms
+  || code >= 0xFF01 && code <= 0xFF60
+  || code >= 0xFFE0 && code <= 0xFFE6
+}
+
 // ── Select 컴포넌트 ─────────────────────────────────────────
 
 pub fn select(
@@ -210,21 +242,24 @@ pub fn text_input(
   preview: fn(String) -> List(String),
   hint: String,
 ) -> Promise(Result(String, Nil)) {
+  let cursor = string.length(initial)
   render_input(
     completed,
     title,
     initial,
+    cursor,
     validate(initial),
     preview(initial),
     hint,
   )
-  input_loop(completed, title, initial, validate, preview, hint)
+  input_loop(completed, title, initial, cursor, validate, preview, hint)
 }
 
 fn render_input(
   completed: List(#(String, String)),
   title: String,
   value: String,
+  cursor: Int,
   error: Option(String),
   preview_lines: List(String),
   hint: String,
@@ -272,7 +307,8 @@ fn render_input(
   // 입력 커서 위치 계산: header(17) + completed + blank(1) + input line
   // banner(16) + blank(1) = 17
   let input_row = 17 + list.length(completed) + 1
-  let input_col = string.length(prefix) + string.length(value)
+  let input_col =
+    display_width(prefix) + display_width(string.slice(value, 0, cursor))
   stdout.execute([
     command.MoveTo(input_col, input_row),
     command.ShowCursor,
@@ -283,38 +319,139 @@ fn input_loop(
   completed: List(#(String, String)),
   title: String,
   value: String,
+  cursor: Int,
   validate: fn(String) -> Option(String),
   preview: fn(String) -> List(String),
   hint: String,
 ) -> Promise(Result(String, Nil)) {
   use evt <- promise.await(event.read())
   case evt {
-    // 문자 입력
+    // 문자 입력 — 커서 위치에 삽입
     Some(Ok(event.Key(event.KeyEvent(
       code: event.Char(c),
       modifiers: event.Modifiers(control: False, alt: False, ..),
       kind: event.Press,
       ..,
     )))) -> {
-      let v = value <> c
-      render_input(completed, title, v, validate(v), preview(v), hint)
-      input_loop(completed, title, v, validate, preview, hint)
+      let before = string.slice(value, 0, cursor)
+      let after =
+        string.slice(value, cursor, string.length(value) - cursor)
+      let v = before <> c <> after
+      let cur = cursor + 1
+      render_input(completed, title, v, cur, validate(v), preview(v), hint)
+      input_loop(completed, title, v, cur, validate, preview, hint)
     }
-    // 백스페이스
+    // 백스페이스 — 커서 앞 문자 삭제
     Some(Ok(event.Key(event.KeyEvent(
       code: event.Backspace,
       kind: event.Press,
       ..,
     )))) -> {
-      let v = string.drop_end(value, 1)
-      render_input(completed, title, v, validate(v), preview(v), hint)
-      input_loop(completed, title, v, validate, preview, hint)
+      case cursor > 0 {
+        True -> {
+          let before = string.slice(value, 0, cursor - 1)
+          let after =
+            string.slice(value, cursor, string.length(value) - cursor)
+          let v = before <> after
+          let cur = cursor - 1
+          render_input(
+            completed, title, v, cur, validate(v), preview(v), hint,
+          )
+          input_loop(completed, title, v, cur, validate, preview, hint)
+        }
+        False ->
+          input_loop(completed, title, value, cursor, validate, preview, hint)
+      }
+    }
+    // Delete — 커서 뒤 문자 삭제
+    Some(Ok(event.Key(event.KeyEvent(
+      code: event.Delete,
+      kind: event.Press,
+      ..,
+    )))) -> {
+      let len = string.length(value)
+      case cursor < len {
+        True -> {
+          let before = string.slice(value, 0, cursor)
+          let after = string.slice(value, cursor + 1, len - cursor - 1)
+          let v = before <> after
+          render_input(
+            completed, title, v, cursor, validate(v), preview(v), hint,
+          )
+          input_loop(completed, title, v, cursor, validate, preview, hint)
+        }
+        False ->
+          input_loop(completed, title, value, cursor, validate, preview, hint)
+      }
+    }
+    // 왼쪽 화살표
+    Some(Ok(event.Key(event.KeyEvent(
+      code: event.LeftArrow,
+      kind: event.Press,
+      ..,
+    )))) -> {
+      case cursor > 0 {
+        True -> {
+          let cur = cursor - 1
+          render_input(
+            completed, title, value, cur, validate(value), preview(value),
+            hint,
+          )
+          input_loop(completed, title, value, cur, validate, preview, hint)
+        }
+        False ->
+          input_loop(completed, title, value, cursor, validate, preview, hint)
+      }
+    }
+    // 오른쪽 화살표
+    Some(Ok(event.Key(event.KeyEvent(
+      code: event.RightArrow,
+      kind: event.Press,
+      ..,
+    )))) -> {
+      let len = string.length(value)
+      case cursor < len {
+        True -> {
+          let cur = cursor + 1
+          render_input(
+            completed, title, value, cur, validate(value), preview(value),
+            hint,
+          )
+          input_loop(completed, title, value, cur, validate, preview, hint)
+        }
+        False ->
+          input_loop(completed, title, value, cursor, validate, preview, hint)
+      }
+    }
+    // Home — 맨 앞으로
+    Some(Ok(event.Key(event.KeyEvent(
+      code: event.Home,
+      kind: event.Press,
+      ..,
+    )))) -> {
+      render_input(
+        completed, title, value, 0, validate(value), preview(value), hint,
+      )
+      input_loop(completed, title, value, 0, validate, preview, hint)
+    }
+    // End — 맨 뒤로
+    Some(Ok(event.Key(event.KeyEvent(
+      code: event.End,
+      kind: event.Press,
+      ..,
+    )))) -> {
+      let len = string.length(value)
+      render_input(
+        completed, title, value, len, validate(value), preview(value), hint,
+      )
+      input_loop(completed, title, value, len, validate, preview, hint)
     }
     // 확인
     Some(Ok(event.Key(event.KeyEvent(code: event.Enter, kind: event.Press, ..)))) -> {
       let trimmed = string.trim(value)
       case validate(trimmed) {
-        Some(_) -> input_loop(completed, title, value, validate, preview, hint)
+        Some(_) ->
+          input_loop(completed, title, value, cursor, validate, preview, hint)
         None -> promise.resolve(Ok(trimmed))
       }
     }
@@ -329,6 +466,6 @@ fn input_loop(
       ..,
     )))) -> promise.resolve(Error(Nil))
     // 그 외
-    _ -> input_loop(completed, title, value, validate, preview, hint)
+    _ -> input_loop(completed, title, value, cursor, validate, preview, hint)
   }
 }
