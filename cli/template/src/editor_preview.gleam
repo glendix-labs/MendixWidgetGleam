@@ -2,7 +2,7 @@
 {{I18N:editor_preview_2}}
 
 import components/hello_world
-import glendix/mendix.{type JsProps}
+import mendraw/mendix.{type JsProps}
 import redraw.{type Element}
 
 {{I18N:editor_preview_doc}}

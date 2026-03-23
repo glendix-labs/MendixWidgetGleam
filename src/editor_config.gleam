@@ -2,7 +2,7 @@
 // getProperties, check, getPreview 등을 정의
 
 import glendix/editor_config.{type Properties}
-import glendix/mendix.{type JsProps}
+import mendraw/mendix.{type JsProps}
 
 /// 속성 패널 설정 - Studio Pro에서 위젯 속성의 가시성을 제어
 pub fn get_properties(

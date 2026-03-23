@@ -2,7 +2,7 @@
 
 Gleam 언어로 Mendix Pluggable Widget 프로젝트를 스케폴딩하는 CLI 도구.
 
-JSX 없이, **Gleam + [glendix](https://hexdocs.pm/glendix/)**로 React 컴포넌트를 작성하여 Mendix Studio Pro에서 동작하는 위젯을 만든다.
+JSX 없이, **Gleam + [glendix](https://hexdocs.pm/glendix/)/[mendraw](https://hexdocs.pm/mendraw/)**로 React 컴포넌트를 작성하여 Mendix Studio Pro에서 동작하는 위젯을 만든다.
 
 ## 사용법
 
@@ -27,14 +27,13 @@ my-widget/
     editor_preview.gleam       # Studio Pro 디자인 뷰 미리보기
     components/
       hello_world.gleam      # Hello World 공유 컴포넌트
-  widgets/                       # .mpk 위젯 파일 (glendix/widget로 바인딩)
-  bindings.json                  # 외부 React 컴포넌트 바인딩 설정
+  widgets/                       # .mpk 위젯 파일 (mendraw/widget로 바인딩)
   package.json                   # npm 의존성 (React, 외부 라이브러리 등)
-  gleam.toml                   # Gleam 프로젝트 설정 (glendix >= 3.0.0 의존성 포함)
+  gleam.toml                   # Gleam 프로젝트 설정 (glendix >= 4.0.2 + mendraw >= 1.1.10 의존성 포함)
   CLAUDE.md                    # AI 어시스턴트용 프로젝트 컨텍스트
 ```
 
-React/Mendix FFI 및 JS Interop 바인딩은 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) Hex 패키지로 제공된다.
+React/Mendix FFI 및 JS Interop 바인딩은 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) 및 [mendraw](https://hexdocs.pm/mendraw/) Hex 패키지로 제공된다.
 
 ## 생성 후 시작하기
 
@@ -43,7 +42,7 @@ cd my-widget
 gleam run -m glendix/install   # 의존성 설치
 gleam run -m glendix/dev       # 개발 서버 시작
 gleam run -m glendix/build     # 프로덕션 빌드 (.mpk 생성)
-gleam run -m glendix/marketplace  # Marketplace 위젯 검색/다운로드
+gleam run -m mendraw/marketplace  # Marketplace 위젯 검색/다운로드
 gleam run -m glendix/define      # 위젯 프로퍼티 정의 TUI 에디터
 ```
 
@@ -51,9 +50,9 @@ gleam run -m glendix/define      # 위젯 프로퍼티 정의 TUI 에디터
 
 생성된 프로젝트는 [glendix](https://hexdocs.pm/glendix/) Hex 패키지를 의존성으로 사용한다. glendix가 React 원시 함수와 Mendix Pluggable Widget API 전체에 대한 타입 안전한 Gleam 바인딩을 제공한다:
 
-- **React** — `react`, `react/attribute`, `react/hook`, `react/event`, `react/html`, `react/svg`, `react/svg_attribute`, `binding`, `widget`
-- **Mendix** — `mendix`, `mendix/editable_value`, `mendix/action`, `mendix/list_value`, `mendix/selection`, `mendix/reference`, `mendix/reference_set`, `mendix/date`, `mendix/big`, `mendix/filter` 등
-- **JS Interop** — `js/array`, `js/object`, `js/json`, `js/promise`, `js/dom`, `js/timer`
+- **React** — `redraw`, `redraw/dom/attribute`, `redraw/hooks`, `redraw/dom/events`, `redraw/dom/html`, `redraw/dom/svg`; bindings via `glendix/binding`
+- **Mendix** (mendraw) — `mendraw/mendix`, `mendraw/mendix/editable_value`, `mendraw/mendix/action`, `mendraw/mendix/list_value`, `mendraw/mendix/selection`, `mendraw/mendix/reference`, `mendraw/mendix/reference_set`, `mendraw/mendix/date`, `mendraw/mendix/decimal`, `mendraw/mendix/filter`, `mendraw/widget` 등
+- **JS Interop** (glendix) — `glendix/js/array`, `glendix/js/object`, `glendix/js/json`, `glendix/js/promise`, `glendix/js/dom`, `glendix/js/timer`
 
 ## 라이선스
 

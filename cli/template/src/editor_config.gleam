@@ -2,7 +2,7 @@
 {{I18N:editor_config_2}}
 
 import glendix/editor_config.{type Properties}
-import glendix/mendix.{type JsProps}
+import mendraw/mendix.{type JsProps}
 
 {{I18N:editor_config_doc}}
 pub fn get_properties(

@@ -4,7 +4,7 @@
 
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { execSync } from "node:child_process";
 import { collect_options } from "../tui/build/dev/javascript/tui/tui.mjs";
 import { collectOptions } from "./prompts.mjs";
@@ -28,7 +28,9 @@ const DIM = "\x1b[2m";
 const YELLOW = "\x1b[33m";
 const MAGENTA = "\x1b[35m";
 
-const VERSION = "1.0.0";
+const VERSION = JSON.parse(
+  await readFile(join(__dirname, "..", "package.json"), "utf-8"),
+).version;
 
 const HELP = `
 ${BOLD}create-mendix-widget-gleam${RESET} — Create Gleam + Mendix Pluggable Widget projects
@@ -66,9 +68,12 @@ const BANNER_LINES = [
 
 const header = '\n' + BANNER_LINES.map(([g, l]) =>
   `${CYAN}${BOLD}${g}${RESET}${MAGENTA}${l}${RESET}`
-).join('\n') + `\n${DIM}         create-mendix-widget-gleam v${VERSION}${RESET}\n`;
+).join('\n') + '\n';
 
 export async function main(args) {
+  // Ctrl+C 즉시 종료
+  process.on("SIGINT", () => process.exit(130));
+
   // Flag handling
   if (args.includes("--help") || args.includes("-h")) {
     console.log(HELP);
@@ -221,35 +226,19 @@ export async function main(args) {
     console.error(`  ${CYAN}${pmConfig.install}${RESET}\n`);
   }
 
-  // Install Playwright Chromium (only if not already installed)
+  // Run glendix/install
+  console.log(`\n${BOLD}${t(lang, "progress.glendixInstalling")}${RESET}\n`);
   try {
-    const chromiumExists =
-      execSync(
-        `node -e "const fs=require('fs'),pw=require('playwright');process.stdout.write(String(fs.existsSync(pw.chromium.executablePath())))"`,
-        { cwd: targetDir, encoding: "utf-8", stdio: ["pipe", "pipe", "ignore"] },
-      ).trim() === "true";
-
-    if (!chromiumExists) {
-      console.log(`\n${BOLD}${t(lang, "progress.playwrightInstalling")}${RESET}\n`);
-      try {
-        execSync("npx playwright install chromium", {
-          cwd: targetDir,
-          stdio: "inherit",
-        });
-        console.log(`\n${GREEN}✓${RESET} ${t(lang, "progress.playwrightInstalled")}`);
-      } catch {
-        console.error(
-          `\n${YELLOW}${t(lang, "error.playwrightFail")}${RESET}`,
-        );
-        console.error(
-          `  ${CYAN}npx playwright install chromium${RESET}\n`,
-        );
-      }
-    } else {
-      console.log(`${GREEN}✓${RESET} ${t(lang, "progress.playwrightExists")}`);
-    }
+    execSync("gleam run -m glendix/install", {
+      cwd: targetDir,
+      stdio: "inherit",
+    });
+    console.log(`\n${GREEN}✓${RESET} ${t(lang, "progress.glendixInstalled")}`);
   } catch {
-    // playwright package not installed — ignore
+    console.error(
+      `\n${YELLOW}${t(lang, "error.glendixInstallFail")}${RESET}`,
+    );
+    console.error(`  ${CYAN}gleam run -m glendix/install${RESET}\n`);
   }
 
   // Production build
@@ -276,7 +265,7 @@ ${BOLD}${t(lang, "done.nextSteps")}${RESET}
   ${CYAN}cd ${names.kebabCase}${RESET}
   ${CYAN}gleam run -m glendix/dev${RESET}             ${DIM}${t(lang, "done.devServer")}${RESET}
   ${CYAN}gleam run -m glendix/build${RESET}           ${DIM}${t(lang, "done.prodBuild")}${RESET}
-  ${CYAN}gleam run -m glendix/marketplace${RESET}     ${DIM}${t(lang, "done.marketplace")}${RESET}
+  ${CYAN}gleam run -m mendraw/marketplace${RESET}     ${DIM}${t(lang, "done.marketplace")}${RESET}
 `);
 
   // etch TUI 이벤트 서버의 stdin 리스너가 이벤트 루프를 유지하므로 명시적 종료

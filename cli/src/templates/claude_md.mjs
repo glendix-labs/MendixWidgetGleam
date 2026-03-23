@@ -15,24 +15,25 @@ export function generateClaudeMdContent(lang, names, pm, pmConfig, organization)
 
   return `# ${names.pascalCase}
 
-A project for developing Mendix Pluggable Widgets with Gleam. Widgets are implemented using only Gleam + [glendix](https://hexdocs.pm/glendix/) bindings, without JSX.
+A project for developing Mendix Pluggable Widgets with Gleam. Widgets are implemented using only Gleam + [glendix](https://hexdocs.pm/glendix/)/[mendraw](https://hexdocs.pm/mendraw/) bindings, without JSX.
 
 ## Commands
 
 \`\`\`bash
-gleam run -m glendix/install      # Install dependencies (Gleam deps + npm + bindings.json code generation)
+gleam run -m glendix/install      # Install dependencies (Gleam deps + npm + TOML widget download + binding generation)
 gleam run -m glendix/build        # Production build (.mpk output)
 gleam run -m glendix/dev          # Dev server (HMR, port 3000)
 gleam run -m glendix/start        # Link with Mendix test project
 gleam run -m glendix/release      # Release build
 gleam run -m glendix/lint         # Run ESLint
 gleam run -m glendix/lint_fix     # ESLint auto-fix
-gleam run -m glendix/marketplace  # Search/download Marketplace widgets
+gleam run -m mendraw/marketplace  # Search/download Marketplace widgets
+gleam run -m mendraw/install      # Generate widget bindings
 gleam test                        # Run tests
 gleam format                      # Format code
 \`\`\`
 
-If you add external React packages to bindings.json, install the npm package manually before running \`glendix/install\`.
+If you add external React packages to \`gleam.toml [tools.glendix.bindings]\`, install the npm package manually before running \`glendix/install\`.
 
 ## Hard Rules
 
@@ -41,7 +42,7 @@ IMPORTANT: Breaking these rules will break the build or compromise the architect
 - **Do not write JSX/JS files directly.** All widget logic and UI must be written in Gleam
 - **Do not write FFI files (.mjs) in the widget project.** React/Mendix FFI is provided by the glendix package
 - **Do not manually manage bridge JS files (src/*.js).** glendix auto-generates/deletes them at build time
-- **React bindings use \`redraw\`/\`redraw_dom\` packages.** glendix v3.0 no longer provides React bindings directly
+- **React bindings use \`redraw\`/\`redraw_dom\` packages.** glendix does not provide React bindings directly
 - The Gleam compilation output path (\`build/dev/javascript/{gleam.toml name}/\`) must match the Rollup input path
 - Mendix widget names allow only alphabetic characters (a-zA-Z)
 
@@ -53,7 +54,7 @@ IMPORTANT: Breaking these rules will break the build or compromise the architect
 
 ## Architecture
 
-Widget entry point signature: \`pub fn widget(props: JsProps) -> Element\` — identical to a React functional component. \`JsProps\` from \`glendix/mendix\`, \`Element\` from \`redraw\`.
+Widget entry point signature: \`pub fn widget(props: JsProps) -> Element\` — identical to a React functional component. \`JsProps\` from \`mendraw/mendix\`, \`Element\` from \`redraw\`.
 
 - \`src/${names.snakeCase}.gleam\` — Main widget (called by Mendix runtime)
 - \`src/editor_config.gleam\` — Studio Pro property panel configuration
@@ -61,8 +62,8 @@ Widget entry point signature: \`pub fn widget(props: JsProps) -> Element\` — i
 - \`src/components/\` — Shared components
 - \`src/${names.pascalCase}.xml\` — Widget property definitions. Adding \`<property>\` triggers automatic type generation by the build tool
 - \`src/package.xml\` — Mendix package manifest
-- \`bindings.json\` — External React component binding configuration
-- \`widgets/\` — .mpk widget file bindings (used via \`glendix/widget\`)
+- \`gleam.toml [tools.glendix.bindings]\` — External React component binding configuration
+- \`widgets/\` — .mpk widget file bindings (used via \`mendraw/widget\`)
 
 ## Build Pipeline
 
@@ -93,6 +94,7 @@ src/*.gleam → gleam build → build/dev/javascript/**/*.mjs → Bridge JS (aut
 For detailed glendix API and Gleam syntax, see:
 
 - docs/glendix_guide.md — Complete React/Mendix bindings guide (elements, Hooks, events, Mendix types, practical patterns, troubleshooting)
+- docs/mendraw_guide.md — mendraw usage guide (widget .mpk bindings, Marketplace download, classic widget support)
 - docs/gleam_language_tour.md — Gleam syntax reference (types, pattern matching, FFI, use keyword, etc.)
 
 ## Mendix Documentation Sources

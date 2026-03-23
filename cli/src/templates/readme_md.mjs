@@ -33,11 +33,11 @@ A Mendix Pluggable Widget written in Gleam.
 
 ## Core Principles
 
-The Gleam function \`fn(JsProps) -> Element\` has the same signature as a React functional component. React bindings come from the \`redraw\`/\`redraw_dom\` packages, while glendix handles Mendix API access and JS interop, so widget projects only need to focus on business logic.
+The Gleam function \`fn(JsProps) -> Element\` has the same signature as a React functional component. React bindings come from the \`redraw\`/\`redraw_dom\` packages, while mendraw handles Mendix API access and JS interop, so widget projects only need to focus on business logic.
 
 \`\`\`gleam
 // src/${names.snakeCase}.gleam
-import glendix/mendix.{type JsProps}
+import mendraw/mendix.{type JsProps}
 import redraw.{type Element}
 import redraw/dom/attribute
 import redraw/dom/html
@@ -53,9 +53,9 @@ pub fn widget(props: JsProps) -> Element {
 Mendix complex types can also be used type-safely from Gleam:
 
 \`\`\`gleam
-import glendix/mendix.{type JsProps}
-import glendix/mendix/editable_value
-import glendix/mendix/action
+import mendraw/mendix.{type JsProps}
+import mendraw/mendix/editable_value
+import mendraw/mendix/action
 import redraw.{type Element}
 
 pub fn widget(props: JsProps) -> Element {
@@ -105,7 +105,7 @@ gleam run -m glendix/start      # Link with Mendix test project
 gleam run -m glendix/lint       # Run ESLint
 gleam run -m glendix/lint_fix   # ESLint auto-fix
 gleam run -m glendix/release    # Release build
-gleam run -m glendix/marketplace # Search/download Marketplace widgets
+gleam run -m mendraw/marketplace # Search/download Marketplace widgets
 gleam run -m glendix/define     # Widget property definition TUI editor
 gleam build --target javascript # Gleam → JS compilation only
 gleam test                      # Run tests
@@ -122,12 +122,11 @@ src/
   components/
     hello_world.gleam            # Shared Hello World component
   ${names.pascalCase}.xml            # Widget property definitions
-widgets/                           # .mpk widget files (bindings via glendix/widget)
-bindings.json                      # External React component binding configuration
+widgets/                           # .mpk widget files (bindings via mendraw/widget)
 package.json                       # npm dependencies (React, external libraries, etc.)
 \`\`\`
 
-React bindings come from [redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/), while Mendix API and JS Interop bindings are provided by [glendix](https://hexdocs.pm/glendix/).
+React bindings come from [redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/), while Mendix API and JS Interop bindings are provided by [mendraw](https://hexdocs.pm/mendraw/).
 
 ## Using External React Components
 
@@ -139,16 +138,13 @@ React component libraries distributed as npm packages can be used from pure Glea
 ${installCmd} recharts
 \`\`\`
 
-### Step 2: Write \`bindings.json\`
+### Step 2: Add bindings to \`gleam.toml\`
 
-Create \`bindings.json\` at the project root and register the components:
+Add a \`[tools.glendix.bindings]\` section to your \`gleam.toml\`:
 
-\`\`\`json
-{
-  "recharts": {
-    "components": ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
-  }
-}
+\`\`\`toml
+[tools.glendix.bindings.recharts]
+components = ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
 \`\`\`
 
 ### Step 3: Generate bindings
@@ -163,7 +159,7 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 import glendix/binding
-import glendix/interop
+import mendraw/interop
 import redraw.{type Element}
 import redraw/dom/attribute.{type Attribute}
 
@@ -197,7 +193,7 @@ MENDIX_PAT=your_personal_access_token
 ### Run
 
 \`\`\`bash
-gleam run -m glendix/marketplace
+gleam run -m mendraw/marketplace
 \`\`\`
 
 Search and select widgets in the interactive TUI. The \`.mpk\` is downloaded to the \`widgets/\` directory, and binding \`.gleam\` files are auto-generated in \`src/widgets/\`.
@@ -231,11 +227,11 @@ This automatically:
 
 \`\`\`gleam
 // src/widgets/switch.gleam (auto-generated)
-import glendix/mendix.{type JsProps}
-import glendix/interop
+import mendraw/mendix.{type JsProps}
+import mendraw/interop
 import redraw.{type Element}
 import redraw/dom/attribute
-import glendix/widget
+import mendraw/widget
 
 /// Render Switch widget - reads properties from props and passes them to the widget
 pub fn render(props: JsProps) -> Element {
@@ -270,7 +266,8 @@ Widget names use the \`<name>\` value from the \`.mpk\`'s internal XML, and prop
 ## Tech Stack
 
 - **Gleam** → JavaScript compilation
-- **[glendix](https://hexdocs.pm/glendix/)** — Mendix API + JS Interop Gleam bindings
+- **[glendix](https://hexdocs.pm/glendix/)** — Build tools + JS Interop Gleam bindings
+- **[mendraw](https://hexdocs.pm/mendraw/)** — Mendix API Gleam bindings
 - **[redraw](https://hexdocs.pm/redraw/)** / **[redraw_dom](https://hexdocs.pm/redraw_dom/)** — React Gleam bindings
 - **Mendix Pluggable Widget** (React 19)
 - **${pm}** — Package manager
@@ -292,11 +289,11 @@ Gleam 언어로 작성된 Mendix Pluggable Widget.
 
 ## 핵심 원리
 
-Gleam 함수 \`fn(JsProps) -> Element\`는 React 함수형 컴포넌트와 동일한 시그니처다. React 바인딩은 \`redraw\`/\`redraw_dom\` 패키지가, Mendix API 접근과 JS interop은 glendix가 제공하므로, 위젯 프로젝트에서는 비즈니스 로직에만 집중하면 된다.
+Gleam 함수 \`fn(JsProps) -> Element\`는 React 함수형 컴포넌트와 동일한 시그니처다. React 바인딩은 \`redraw\`/\`redraw_dom\` 패키지가, Mendix API 접근과 JS interop은 mendraw가 제공하므로, 위젯 프로젝트에서는 비즈니스 로직에만 집중하면 된다.
 
 \`\`\`gleam
 // src/${names.snakeCase}.gleam
-import glendix/mendix.{type JsProps}
+import mendraw/mendix.{type JsProps}
 import redraw.{type Element}
 import redraw/dom/attribute
 import redraw/dom/html
@@ -312,9 +309,9 @@ pub fn widget(props: JsProps) -> Element {
 Mendix 복합 타입도 Gleam에서 타입 안전하게 사용할 수 있다:
 
 \`\`\`gleam
-import glendix/mendix.{type JsProps}
-import glendix/mendix/editable_value
-import glendix/mendix/action
+import mendraw/mendix.{type JsProps}
+import mendraw/mendix/editable_value
+import mendraw/mendix/action
 import redraw.{type Element}
 
 pub fn widget(props: JsProps) -> Element {
@@ -364,7 +361,7 @@ gleam run -m glendix/start      # Mendix 테스트 프로젝트 연동
 gleam run -m glendix/lint       # ESLint 실행
 gleam run -m glendix/lint_fix   # ESLint 자동 수정
 gleam run -m glendix/release    # 릴리즈 빌드
-gleam run -m glendix/marketplace # Marketplace 위젯 검색/다운로드
+gleam run -m mendraw/marketplace # Marketplace 위젯 검색/다운로드
 gleam run -m glendix/define     # 위젯 프로퍼티 정의 TUI 에디터
 gleam build --target javascript # Gleam → JS 컴파일만
 gleam test                      # 테스트 실행
@@ -381,12 +378,11 @@ src/
   components/
     hello_world.gleam            # Hello World 공유 컴포넌트
   ${names.pascalCase}.xml            # 위젯 속성 정의
-widgets/                           # .mpk 위젯 파일 (glendix/widget로 바인딩)
-bindings.json                      # 외부 React 컴포넌트 바인딩 설정
+widgets/                           # .mpk 위젯 파일 (mendraw/widget로 바인딩)
 package.json                       # npm 의존성 (React, 외부 라이브러리 등)
 \`\`\`
 
-React 바인딩은 [redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/)이, Mendix API 및 JS Interop 바인딩은 [glendix](https://hexdocs.pm/glendix/)가 제공합니다.
+React 바인딩은 [redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/)이, Mendix API 및 JS Interop 바인딩은 [mendraw](https://hexdocs.pm/mendraw/)가 제공합니다.
 
 ## 외부 React 컴포넌트 사용
 
@@ -398,16 +394,13 @@ npm 패키지로 제공되는 React 컴포넌트 라이브러리를 \`.mjs\` FFI
 ${installCmd} recharts
 \`\`\`
 
-### 2단계: \`bindings.json\` 작성
+### 2단계: \`gleam.toml\`에 바인딩 추가
 
-프로젝트 루트에 \`bindings.json\`을 생성하고, 사용할 컴포넌트를 등록한다:
+\`gleam.toml\`에 \`[tools.glendix.bindings]\` 섹션을 추가한다:
 
-\`\`\`json
-{
-  "recharts": {
-    "components": ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
-  }
-}
+\`\`\`toml
+[tools.glendix.bindings.recharts]
+components = ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
 \`\`\`
 
 ### 3단계: 바인딩 생성
@@ -422,7 +415,7 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 import glendix/binding
-import glendix/interop
+import mendraw/interop
 import redraw.{type Element}
 import redraw/dom/attribute.{type Attribute}
 
@@ -456,7 +449,7 @@ MENDIX_PAT=your_personal_access_token
 ### 실행
 
 \`\`\`bash
-gleam run -m glendix/marketplace
+gleam run -m mendraw/marketplace
 \`\`\`
 
 인터랙티브 TUI에서 위젯을 검색/선택하면 \`widgets/\` 디렉토리에 \`.mpk\`가 다운로드되고, \`src/widgets/\`에 바인딩 \`.gleam\` 파일이 자동 생성된다.
@@ -490,11 +483,11 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 // src/widgets/switch.gleam (자동 생성)
-import glendix/mendix.{type JsProps}
-import glendix/interop
+import mendraw/mendix.{type JsProps}
+import mendraw/interop
 import redraw.{type Element}
 import redraw/dom/attribute
-import glendix/widget
+import mendraw/widget
 
 /// Switch 위젯 렌더링 - props에서 속성을 읽어 위젯에 전달
 pub fn render(props: JsProps) -> Element {
@@ -529,7 +522,8 @@ switch.render(props)
 ## 기술 스택
 
 - **Gleam** → JavaScript 컴파일
-- **[glendix](https://hexdocs.pm/glendix/)** — Mendix API + JS Interop Gleam 바인딩
+- **[glendix](https://hexdocs.pm/glendix/)** — 빌드 도구 + JS Interop Gleam 바인딩
+- **[mendraw](https://hexdocs.pm/mendraw/)** — Mendix API Gleam 바인딩
 - **[redraw](https://hexdocs.pm/redraw/)** / **[redraw_dom](https://hexdocs.pm/redraw_dom/)** — React Gleam 바인딩
 - **Mendix Pluggable Widget** (React 19)
 - **${pm}** — 패키지 매니저
@@ -551,11 +545,11 @@ Gleam言語で作成されたMendix Pluggable Widget。
 
 ## 基本原理
 
-Gleam関数 \`fn(JsProps) -> Element\` はReact関数コンポーネントと同一のシグネチャを持つ。Reactバインディングは\`redraw\`/\`redraw_dom\`パッケージが、Mendix APIアクセスとJS interopはglendixが提供するため、ウィジェットプロジェクトではビジネスロジックにのみ集中すればよい。
+Gleam関数 \`fn(JsProps) -> Element\` はReact関数コンポーネントと同一のシグネチャを持つ。Reactバインディングは\`redraw\`/\`redraw_dom\`パッケージが、Mendix APIアクセスとJS interopはmendrawが提供するため、ウィジェットプロジェクトではビジネスロジックにのみ集中すればよい。
 
 \`\`\`gleam
 // src/${names.snakeCase}.gleam
-import glendix/mendix.{type JsProps}
+import mendraw/mendix.{type JsProps}
 import redraw.{type Element}
 import redraw/dom/attribute
 import redraw/dom/html
@@ -571,9 +565,9 @@ pub fn widget(props: JsProps) -> Element {
 Mendixの複合型もGleamから型安全に使用できる：
 
 \`\`\`gleam
-import glendix/mendix.{type JsProps}
-import glendix/mendix/editable_value
-import glendix/mendix/action
+import mendraw/mendix.{type JsProps}
+import mendraw/mendix/editable_value
+import mendraw/mendix/action
 import redraw.{type Element}
 
 pub fn widget(props: JsProps) -> Element {
@@ -623,7 +617,7 @@ gleam run -m glendix/start      # Mendixテストプロジェクト連携
 gleam run -m glendix/lint       # ESLint実行
 gleam run -m glendix/lint_fix   # ESLint自動修正
 gleam run -m glendix/release    # リリースビルド
-gleam run -m glendix/marketplace # Marketplaceウィジェット検索/ダウンロード
+gleam run -m mendraw/marketplace # Marketplaceウィジェット検索/ダウンロード
 gleam run -m glendix/define     # ウィジェットプロパティ定義TUIエディター
 gleam build --target javascript # Gleam → JSコンパイルのみ
 gleam test                      # テスト実行
@@ -640,12 +634,11 @@ src/
   components/
     hello_world.gleam            # Hello World共有コンポーネント
   ${names.pascalCase}.xml            # ウィジェットプロパティ定義
-widgets/                           # .mpkウィジェットファイル（glendix/widgetでバインディング）
-bindings.json                      # 外部Reactコンポーネントバインディング設定
+widgets/                           # .mpkウィジェットファイル（mendraw/widgetでバインディング）
 package.json                       # npm依存関係（React、外部ライブラリなど）
 \`\`\`
 
-Reactバインディングは[redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/)が、Mendix APIおよびJS Interopバインディングは[glendix](https://hexdocs.pm/glendix/)が提供する。
+Reactバインディングは[redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/)が、Mendix APIおよびJS Interopバインディングは[mendraw](https://hexdocs.pm/mendraw/)が提供する。
 
 ## 外部Reactコンポーネントの使用
 
@@ -657,16 +650,13 @@ npmパッケージとして提供されるReactコンポーネントライブラ
 ${installCmd} recharts
 \`\`\`
 
-### ステップ2：\`bindings.json\`の作成
+### ステップ2：\`gleam.toml\`にバインディングを追加
 
-プロジェクトルートに\`bindings.json\`を作成し、使用するコンポーネントを登録する：
+\`gleam.toml\`に\`[tools.glendix.bindings]\`セクションを追加する：
 
-\`\`\`json
-{
-  "recharts": {
-    "components": ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
-  }
-}
+\`\`\`toml
+[tools.glendix.bindings.recharts]
+components = ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
 \`\`\`
 
 ### ステップ3：バインディングの生成
@@ -681,7 +671,7 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 import glendix/binding
-import glendix/interop
+import mendraw/interop
 import redraw.{type Element}
 import redraw/dom/attribute.{type Attribute}
 
@@ -715,7 +705,7 @@ MENDIX_PAT=your_personal_access_token
 ### 実行
 
 \`\`\`bash
-gleam run -m glendix/marketplace
+gleam run -m mendraw/marketplace
 \`\`\`
 
 インタラクティブTUIでウィジェットを検索・選択すると、\`widgets/\`ディレクトリに\`.mpk\`がダウンロードされ、\`src/widgets/\`にバインディング\`.gleam\`ファイルが自動生成される。
@@ -749,11 +739,11 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 // src/widgets/switch.gleam（自動生成）
-import glendix/mendix.{type JsProps}
-import glendix/interop
+import mendraw/mendix.{type JsProps}
+import mendraw/interop
 import redraw.{type Element}
 import redraw/dom/attribute
-import glendix/widget
+import mendraw/widget
 
 /// Switchウィジェットのレンダリング - propsからプロパティを読み取りウィジェットに渡す
 pub fn render(props: JsProps) -> Element {
@@ -788,7 +778,8 @@ switch.render(props)
 ## 技術スタック
 
 - **Gleam** → JavaScriptコンパイル
-- **[glendix](https://hexdocs.pm/glendix/)** — Mendix API + JS Interop Gleamバインディング
+- **[glendix](https://hexdocs.pm/glendix/)** — ビルドツール + JS Interop Gleamバインディング
+- **[mendraw](https://hexdocs.pm/mendraw/)** — Mendix API Gleamバインディング
 - **[redraw](https://hexdocs.pm/redraw/)** / **[redraw_dom](https://hexdocs.pm/redraw_dom/)** — React Gleamバインディング
 - **Mendix Pluggable Widget**（React 19）
 - **${pm}** — パッケージマネージャー

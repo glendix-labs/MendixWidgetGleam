@@ -48,11 +48,10 @@ const messages = {
     "progress.depsInstalled": "Dependencies installed",
     "error.depsInstallFail":
       "⚠ Dependency installation failed. Run manually in the project directory:",
-    "progress.playwrightInstalling": "Installing Playwright Chromium...",
-    "progress.playwrightInstalled": "Playwright Chromium installed",
-    "progress.playwrightExists": "Playwright Chromium already installed",
-    "error.playwrightFail":
-      "⚠ Playwright browser installation failed. Run manually in the project directory:",
+    "progress.glendixInstalling": "Running glendix/install...",
+    "progress.glendixInstalled": "glendix/install complete",
+    "error.glendixInstallFail":
+      "⚠ glendix/install failed. Run manually:",
     "progress.buildingWidget": "Building widget...",
     "progress.widgetBuilt": "Widget build complete",
     "error.buildFail":
@@ -119,11 +118,10 @@ const messages = {
     "progress.depsInstalled": "의존성 설치 완료",
     "error.depsInstallFail":
       "⚠ 의존성 설치 실패. 프로젝트 디렉토리에서 직접 실행하세요:",
-    "progress.playwrightInstalling": "Playwright Chromium 설치 중...",
-    "progress.playwrightInstalled": "Playwright Chromium 설치 완료",
-    "progress.playwrightExists": "Playwright Chromium 이미 설치됨",
-    "error.playwrightFail":
-      "⚠ Playwright 브라우저 설치 실패. 프로젝트 디렉토리에서 직접 실행하세요:",
+    "progress.glendixInstalling": "glendix/install 실행 중...",
+    "progress.glendixInstalled": "glendix/install 완료",
+    "error.glendixInstallFail":
+      "⚠ glendix/install 실패. 직접 실행하세요:",
     "progress.buildingWidget": "위젯 빌드 중...",
     "progress.widgetBuilt": "위젯 빌드 완료",
     "error.buildFail":
@@ -190,11 +188,10 @@ const messages = {
     "progress.depsInstalled": "依存関係インストール完了",
     "error.depsInstallFail":
       "⚠ 依存関係インストール失敗。プロジェクトディレクトリで直接実行してください:",
-    "progress.playwrightInstalling": "Playwright Chromiumインストール中...",
-    "progress.playwrightInstalled": "Playwright Chromiumインストール完了",
-    "progress.playwrightExists": "Playwright Chromiumインストール済み",
-    "error.playwrightFail":
-      "⚠ Playwrightブラウザインストール失敗。プロジェクトディレクトリで直接実行してください:",
+    "progress.glendixInstalling": "glendix/installを実行中...",
+    "progress.glendixInstalled": "glendix/install完了",
+    "error.glendixInstallFail":
+      "⚠ glendix/install失敗。直接実行してください:",
     "progress.buildingWidget": "ウィジェットビルド中...",
     "progress.widgetBuilt": "ウィジェットビルド完了",
     "error.buildFail":

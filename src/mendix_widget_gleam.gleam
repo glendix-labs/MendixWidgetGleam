@@ -2,7 +2,7 @@
 // React 함수형 컴포넌트: fn(JsProps) -> Element
 
 import components/hello_world
-import glendix/mendix.{type JsProps}
+import mendraw/mendix.{type JsProps}
 import redraw.{type Element}
 
 /// 위젯 메인 함수 - Mendix 런타임이 React 컴포넌트로 호출

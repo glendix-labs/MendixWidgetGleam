@@ -48,9 +48,9 @@ For example, placing \`Switch.mpk\` generates \`src/widgets/switch.gleam\`:
 
 \`\`\`gleam
 // src/widgets/switch.gleam (auto-generated)
-import glendix/interop
-import glendix/mendix.{type JsProps}
-import glendix/widget
+import mendraw/interop
+import mendraw/mendix.{type JsProps}
+import mendraw/widget
 import redraw.{type Element}
 import redraw/dom/attribute
 
@@ -87,7 +87,7 @@ switch.render(props)
 
 ## How it works
 
-- \`glendix/widget\` module's \`widget.component("Name")\` imports \`.mpk\` widgets as React components
+- \`mendraw/widget\` module's \`widget.component("Name")\` imports \`.mpk\` widgets as React components
 - Props are passed via the generic \`attribute.attribute(key, value)\` function
 - Widget names use the \`<name>\` value from the \`.mpk\`'s internal XML, and property keys use the original keys from the \`.mpk\` XML
 - Unlike the \`binding\` module, 1 mpk = 1 component, so \`widget.component("Name")\` imports it in one call
@@ -96,7 +96,7 @@ switch.render(props)
 
 - After adding/removing \`.mpk\` files, you must run \`gleam run -m glendix/install\` again
 - \`widget_ffi.mjs\` is auto-generated — do not edit it directly
-- Do not write \`.mjs\` FFI files for \`.mpk\` widgets manually — use the \`widgets/\` directory + \`glendix/widget\`
+- Do not write \`.mjs\` FFI files for \`.mpk\` widgets manually — use the \`widgets/\` directory + \`mendraw/widget\`
 `;
 }
 
@@ -135,9 +135,9 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 // src/widgets/switch.gleam (자동 생성)
-import glendix/interop
-import glendix/mendix.{type JsProps}
-import glendix/widget
+import mendraw/interop
+import mendraw/mendix.{type JsProps}
+import mendraw/widget
 import redraw.{type Element}
 import redraw/dom/attribute
 
@@ -174,7 +174,7 @@ switch.render(props)
 
 ## 동작 원리
 
-- \`glendix/widget\` 모듈의 \`widget.component("Name")\`으로 \`.mpk\` 위젯을 React 컴포넌트로 가져온다
+- \`mendraw/widget\` 모듈의 \`widget.component("Name")\`으로 \`.mpk\` 위젯을 React 컴포넌트로 가져온다
 - Props는 \`attribute.attribute(key, value)\` 범용 함수로 전달한다
 - 위젯 이름은 \`.mpk\` 내부 XML의 \`<name>\` 값을, property key는 XML의 원본 key를 그대로 사용한다
 - \`binding\` 모듈과 달리 1 mpk = 1 컴포넌트이므로 \`widget.component("Name")\` 한 번에 가져온다
@@ -183,7 +183,7 @@ switch.render(props)
 
 - \`.mpk\` 파일을 추가/제거한 후에는 반드시 \`gleam run -m glendix/install\`을 다시 실행해야 한다
 - \`widget_ffi.mjs\`는 자동 생성 파일이므로 직접 수정하지 않는다
-- \`.mpk\` 위젯용 \`.mjs\` FFI 파일을 직접 작성하지 않는다 — \`widgets/\` 디렉토리 + \`glendix/widget\`을 사용한다
+- \`.mpk\` 위젯용 \`.mjs\` FFI 파일을 직접 작성하지 않는다 — \`widgets/\` 디렉토리 + \`mendraw/widget\`을 사용한다
 `;
 }
 
@@ -222,9 +222,9 @@ gleam run -m glendix/install
 
 \`\`\`gleam
 // src/widgets/switch.gleam（自動生成）
-import glendix/interop
-import glendix/mendix.{type JsProps}
-import glendix/widget
+import mendraw/interop
+import mendraw/mendix.{type JsProps}
+import mendraw/widget
 import redraw.{type Element}
 import redraw/dom/attribute
 
@@ -261,7 +261,7 @@ switch.render(props)
 
 ## 仕組み
 
-- \`glendix/widget\`モジュールの\`widget.component("Name")\`で\`.mpk\`ウィジェットをReactコンポーネントとしてインポートする
+- \`mendraw/widget\`モジュールの\`widget.component("Name")\`で\`.mpk\`ウィジェットをReactコンポーネントとしてインポートする
 - Propsは\`attribute.attribute(key, value)\`汎用関数で渡す
 - ウィジェット名は\`.mpk\`内部XMLの\`<name>\`値を、プロパティキーはXMLの元のキーをそのまま使用する
 - \`binding\`モジュールと異なり1 mpk = 1コンポーネントなので、\`widget.component("Name")\`で一度にインポートする
@@ -270,6 +270,6 @@ switch.render(props)
 
 - \`.mpk\`ファイルを追加/削除した後は必ず\`gleam run -m glendix/install\`を再実行すること
 - \`widget_ffi.mjs\`は自動生成ファイルなので直接編集しない
-- \`.mpk\`ウィジェット用の\`.mjs\` FFIファイルを直接記述しない — \`widgets/\`ディレクトリ + \`glendix/widget\`を使用する
+- \`.mpk\`ウィジェット用の\`.mjs\` FFIファイルを直接記述しない — \`widgets/\`ディレクトリ + \`mendraw/widget\`を使用する
 `;
 }

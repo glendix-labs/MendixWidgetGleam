@@ -4,14 +4,14 @@
 
 **Build Mendix Pluggable Widgets with Gleam — no JSX required.**
 
-Write React components entirely in Gleam and run them as Mendix Studio Pro widgets. React and Mendix API bindings are provided by the [glendix](https://hexdocs.pm/glendix/) package.
+Write React components entirely in Gleam and run them as Mendix Studio Pro widgets. React bindings are provided by [redraw](https://hexdocs.pm/redraw/)/[redraw_dom](https://hexdocs.pm/redraw_dom/), Mendix API bindings by [mendraw](https://hexdocs.pm/mendraw/), and build tools + JS interop by [glendix](https://hexdocs.pm/glendix/).
 
 ## Why Gleam?
 
 - **Static type safety** — Gleam's robust type system catches runtime errors at compile time
 - **Immutable data** — Predictable state management
 - **JavaScript target support** — `gleam build --target javascript` outputs ES modules
-- **glendix package** — Type-safe Gleam bindings for React + Mendix API + JS Interop, supporting `EditableValue`, `ActionValue`, `ListValue` and all other Mendix Pluggable Widget API types
+- **glendix + mendraw packages** — Type-safe Gleam bindings for React + Mendix API + JS Interop, supporting `EditableValue`, `ActionValue`, `ListValue` and all other Mendix Pluggable Widget API types
 
 ## Architecture
 
@@ -24,13 +24,12 @@ src/
     hello_world.gleam               # Shared Hello World component
   MendixWidget.xml                    # Widget property definitions
   package.xml                         # Mendix package manifest
-widgets/                                # .mpk widget files (used via glendix/widget)
-bindings.json                           # External React component binding configuration
+widgets/                                # .mpk widget files (used via mendraw/widget)
 package.json                            # npm dependencies (React, external libraries, etc.)
-gleam.toml                            # Includes glendix >= 3.0.0 dependency
+gleam.toml                            # Includes glendix >= 4.0.2 + mendraw dependency
 ```
 
-React/Mendix FFI and JS Interop bindings are not included in this project — they are provided by the [glendix](https://hexdocs.pm/glendix/) Hex package.
+React/Mendix FFI and JS Interop bindings are not included in this project — they are provided by the [glendix](https://hexdocs.pm/glendix/) and [mendraw](https://hexdocs.pm/mendraw/) Hex packages.
 
 ### Build Pipeline
 
@@ -45,11 +44,11 @@ ES modules (.mjs) — build/dev/javascript/...
 
 ### Core Principles
 
-The Gleam function `fn(JsProps) -> Element` has an identical signature to a React functional component. React bindings are provided by [redraw](https://hexdocs.pm/redraw/) / [redraw_dom](https://hexdocs.pm/redraw_dom/), while glendix provides Mendix runtime type accessors and JS interop, so widget projects need only focus on business logic.
+The Gleam function `fn(JsProps) -> Element` has an identical signature to a React functional component. React bindings are provided by [redraw](https://hexdocs.pm/redraw/) / [redraw_dom](https://hexdocs.pm/redraw_dom/), while mendraw provides Mendix runtime type accessors and glendix provides JS interop, so widget projects need only focus on business logic.
 
 ```gleam
 // src/mendix_widget_gleam.gleam
-import glendix/mendix.{type JsProps}
+import mendraw/mendix.{type JsProps}
 import redraw.{type Element}
 import redraw/dom/attribute
 import redraw/dom/html
@@ -65,9 +64,9 @@ pub fn widget(props: JsProps) -> Element {
 Mendix complex types can also be used in a type-safe manner from Gleam:
 
 ```gleam
-import glendix/mendix
-import glendix/mendix/editable_value
-import glendix/mendix/action
+import mendraw/mendix
+import mendraw/mendix/editable_value
+import mendraw/mendix/action
 
 pub fn widget(props: JsProps) -> Element {
   // Access EditableValue
@@ -123,7 +122,7 @@ All commands are unified under `gleam`. `gleam run -m` automatically compiles Gl
 | `gleam run -m glendix/lint` | Run ESLint |
 | `gleam run -m glendix/lint_fix` | ESLint auto-fix |
 | `gleam run -m glendix/release` | Release build |
-| `gleam run -m glendix/marketplace` | Search/download Mendix Marketplace widgets |
+| `gleam run -m mendraw/marketplace` | Search/download Mendix Marketplace widgets |
 | `gleam run -m glendix/define` | Widget property definition TUI editor |
 | `gleam build --target javascript` | Gleam to JS compilation only |
 | `gleam test` | Run Gleam tests |
@@ -139,16 +138,13 @@ React component libraries distributed as npm packages can be used from pure Glea
 npm install recharts
 ```
 
-### Step 2: Write `bindings.json`
+### Step 2: Add bindings to `gleam.toml`
 
-Create `bindings.json` at the project root and register the components you wish to use:
+Add a `[tools.glendix.bindings]` section to your `gleam.toml`:
 
-```json
-{
-  "recharts": {
-    "components": ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
-  }
-}
+```toml
+[tools.glendix.bindings.recharts]
+components = ["PieChart", "Pie", "Cell", "Tooltip", "ResponsiveContainer"]
 ```
 
 ### Step 3: Generate bindings
@@ -163,7 +159,7 @@ A `binding_ffi.mjs` file is generated automatically. It is also regenerated on s
 
 ```gleam
 import glendix/binding
-import glendix/interop
+import mendraw/interop
 import redraw.{type Element}
 import redraw/dom/attribute.{type Attribute}
 
@@ -197,7 +193,7 @@ MENDIX_PAT=your_personal_access_token
 ### Run
 
 ```bash
-gleam run -m glendix/marketplace
+gleam run -m mendraw/marketplace
 ```
 
 Search and select widgets in the interactive TUI. The `.mpk` is downloaded to the `widgets/` directory, and binding `.gleam` files are auto-generated in `src/widgets/`.
@@ -231,11 +227,11 @@ This automatically:
 
 ```gleam
 // src/widgets/switch.gleam (auto-generated)
-import glendix/mendix.{type JsProps}
-import glendix/interop
+import mendraw/mendix.{type JsProps}
+import mendraw/interop
 import redraw.{type Element}
 import redraw/dom/attribute
-import glendix/widget
+import mendraw/widget
 
 /// Render the Switch widget — reads properties from props and passes them to the widget
 pub fn render(props: JsProps) -> Element {
@@ -270,7 +266,8 @@ The widget name comes from the `<name>` value in the `.mpk`'s internal XML, and 
 ## Tech Stack
 
 - **Gleam** — Widget logic and UI (compiled to JavaScript target)
-- **[glendix](https://hexdocs.pm/glendix/)** — React + Mendix API + JS Interop Gleam bindings (Hex package)
+- **[glendix](https://hexdocs.pm/glendix/)** — Build tools + JS Interop Gleam bindings (Hex package)
+- **[mendraw](https://hexdocs.pm/mendraw/)** — Mendix API Gleam bindings (Hex package)
 - **React 19** — Mendix Pluggable Widget runtime
 - **Rollup** — Bundling via `@mendix/pluggable-widgets-tools`
 
