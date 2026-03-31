@@ -8,7 +8,7 @@ runtime = "node"
 
 [dependencies]
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
-glendix = ">= 4.0.4 and < 5.0.0"
+glendix = ">= 4.0.5 and < 5.0.0"
 mendraw = ">= 1.2.1 and < 2.0.0"
 dee = ">= 1.0.0 and < 2.0.0"
 redraw = ">= 19.2.2 and < 20.0.0"

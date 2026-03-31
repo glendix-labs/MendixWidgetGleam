@@ -25,7 +25,7 @@ src/
   MendixWidget.xml                    # ウィジェットプロパティ定義
   package.xml                         # Mendixパッケージマニフェスト
 package.json                            # npm依存関係（React、外部ライブラリなど）
-gleam.toml                            # glendix >= 4.0.4 + mendraw依存関係を含む
+gleam.toml                            # glendix >= 4.0.5 + mendraw依存関係を含む
 ```
 
 React/Mendix FFIおよびJS Interopバインディングはこのプロジェクトには含まれず、[glendix](https://hexdocs.pm/glendix/)および[mendraw](https://hexdocs.pm/mendraw/) Hexパッケージとして提供される。

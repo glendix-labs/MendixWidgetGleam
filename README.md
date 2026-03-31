@@ -25,7 +25,7 @@ src/
   MendixWidget.xml                    # Widget property definitions
   package.xml                         # Mendix package manifest
 package.json                            # npm dependencies (React, external libraries, etc.)
-gleam.toml                            # Includes glendix >= 4.0.4 + mendraw dependency
+gleam.toml                            # Includes glendix >= 4.0.5 + mendraw dependency
 ```
 
 React/Mendix FFI and JS Interop bindings are not included in this project — they are provided by the [glendix](https://hexdocs.pm/glendix/) and [mendraw](https://hexdocs.pm/mendraw/) Hex packages.

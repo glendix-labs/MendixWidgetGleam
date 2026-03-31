@@ -28,7 +28,7 @@ my-widget/
     components/
       hello_world.gleam      # Hello World 공유 컴포넌트
   package.json                   # npm 의존성 (React, 외부 라이브러리 등)
-  gleam.toml                   # Gleam 프로젝트 설정 (glendix >= 4.0.4 + mendraw >= 1.2.1 의존성 포함)
+  gleam.toml                   # Gleam 프로젝트 설정 (glendix >= 4.0.5 + mendraw >= 1.2.1 의존성 포함)
   CLAUDE.md                    # AI 어시스턴트용 프로젝트 컨텍스트
 ```
 

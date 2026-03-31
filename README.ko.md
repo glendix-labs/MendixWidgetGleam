@@ -25,7 +25,7 @@ src/
   MendixWidget.xml                    # 위젯 속성 정의
   package.xml                         # Mendix 패키지 매니페스트
 package.json                            # npm 의존성 (React, 외부 라이브러리 등)
-gleam.toml                            # glendix >= 4.0.4 + mendraw 의존성 포함
+gleam.toml                            # glendix >= 4.0.5 + mendraw 의존성 포함
 ```
 
 React/Mendix FFI 및 JS Interop 바인딩은 이 프로젝트에 포함되지 않으며, [glendix](https://hexdocs.pm/glendix/) 및 [mendraw](https://hexdocs.pm/mendraw/) Hex 패키지로 제공된다.
